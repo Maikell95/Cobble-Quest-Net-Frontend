@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <clipPath id="round">
+      <rect width="200" height="200" rx="32" ry="32"/>
+    </clipPath>
+  </defs>
+  <image href="/images/cobblequest.jpg" width="200" height="200" clip-path="url(#round)" preserveAspectRatio="xMidYMid slice"/>
+</svg>
