@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { getPokemonData } from '../../data/pokemonCache';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 
 // ===== Types =====
-interface PokemonStats {
+export interface PokemonStats {
   hp: number;
   attack: number;
   defence: number;
@@ -53,7 +54,7 @@ interface PokemonDrop {
   qty: string;
 }
 
-interface Pokemon {
+export interface Pokemon {
   id: number;
   name: string;
   types: string[];
@@ -868,11 +869,10 @@ export default function Wiki() {
   const [page, setPage] = useState(1);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  // Load data
+  // Load data (prefetched at app startup)
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}data/pokemon.json`)
-      .then((r) => r.json())
-      .then((data: Pokemon[]) => {
+    getPokemonData()
+      .then((data) => {
         setAllPokemon(data);
         setLoading(false);
       })
