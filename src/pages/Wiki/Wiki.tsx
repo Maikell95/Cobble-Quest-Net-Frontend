@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { getPokemonData } from '../../data/pokemonCache';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -869,9 +868,10 @@ export default function Wiki() {
   const [page, setPage] = useState(1);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  // Load data (prefetched at app startup)
+  // Load data when Wiki page is opened
   useEffect(() => {
-    getPokemonData()
+    fetch(`${import.meta.env.BASE_URL}data/pokemon.json`)
+      .then((r) => r.json())
       .then((data) => {
         setAllPokemon(data);
         setLoading(false);

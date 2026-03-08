@@ -63,23 +63,16 @@ export default function Home() {
   const serverStats = useServerStatus();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Load and play video lazily after component mounts
+  // Video time management
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Start loading after a short delay so critical resources load first
-    const loadTimer = setTimeout(() => {
-      video.src = `${B}videos/trailer.mp4`;
-      video.load();
-
-      const saved = sessionStorage.getItem('hero-video-time');
-      if (saved) {
-        const t = parseFloat(saved);
-        if (t > 0 && t < VIDEO_MAX_TIME) video.currentTime = t;
-      }
-      video.play().catch(() => {});
-    }, 300);
+    const saved = sessionStorage.getItem('hero-video-time');
+    if (saved) {
+      const t = parseFloat(saved);
+      if (t > 0 && t < VIDEO_MAX_TIME) video.currentTime = t;
+    }
 
     const handleTimeUpdate = () => {
       if (video.currentTime >= VIDEO_MAX_TIME) {
@@ -90,11 +83,8 @@ export default function Home() {
 
     video.addEventListener('timeupdate', handleTimeUpdate);
     return () => {
-      clearTimeout(loadTimer);
       video.removeEventListener('timeupdate', handleTimeUpdate);
-      if (video.currentTime > 0) {
-        sessionStorage.setItem('hero-video-time', String(video.currentTime));
-      }
+      sessionStorage.setItem('hero-video-time', String(video.currentTime));
     };
   }, []);
 
@@ -109,8 +99,8 @@ export default function Home() {
       {/* ===== HERO SECTION ===== */}
       <section className="relative min-h-[90vh] flex items-center justify-center p-8 max-md:p-5 max-md:pt-24 max-md:min-h-[100svh] overflow-hidden">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover scale-[1.15] max-md:scale-100" muted playsInline loop={false} preload="none" poster="">
-            <source src="" type="video/mp4" />
+          <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover scale-[1.15] max-md:scale-100" autoPlay muted playsInline loop={false}>
+            <source src={`${B}videos/trailer.mp4`} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-black/40 z-[1]" />
           <div className="absolute inset-0 z-[2] animate-drift max-md:hidden"
