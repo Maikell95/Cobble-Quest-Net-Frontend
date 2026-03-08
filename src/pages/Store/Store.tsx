@@ -153,11 +153,11 @@ export default function Store() {
         </div>
 
         {/* Categories */}
-        <div className="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-none max-md:gap-2 max-md:-mx-4 max-md:px-4">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              className={`flex items-center gap-3 px-7 py-3.5 rounded-xl border text-[0.95rem] font-semibold cursor-pointer whitespace-nowrap transition-all ${
+              className={`flex items-center gap-3 px-7 py-3.5 rounded-xl border text-[0.95rem] font-semibold cursor-pointer whitespace-nowrap transition-all max-md:px-5 max-md:py-3 max-md:text-[0.88rem] max-md:gap-2 max-md:rounded-lg ${
                 activeCategory === cat.id
                   ? 'bg-primary/10 border-primary/30 text-primary'
                   : 'bg-[var(--bg-surface)] border-[var(--border-theme)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]'
@@ -173,7 +173,7 @@ export default function Store() {
         </div>
 
         {/* Items Grid */}
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5 max-sm:grid-cols-1">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5 max-sm:grid-cols-1 max-sm:gap-4">
           {filteredItems.map((item, index) => (
             <motion.div
               key={item.id}
@@ -220,7 +220,7 @@ export default function Store() {
                         : item.price.toFixed(2)}
                     </span>
                   </div>
-                  <button className="flex items-center gap-1.5 px-4 py-2 rounded-[10px] bg-gradient-to-br from-primary to-primary-dark text-white border-none text-[0.85rem] font-semibold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(220,38,38,0.35)]">
+                  <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-gradient-to-br from-primary to-primary-dark text-white border-none text-[0.85rem] font-semibold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(220,38,38,0.35)] active:scale-95">
                     <ShoppingCart size={16} />
                     Añadir
                   </button>

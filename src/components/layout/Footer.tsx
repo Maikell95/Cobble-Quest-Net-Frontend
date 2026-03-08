@@ -4,8 +4,8 @@ import { SERVER_CONFIG, NAV_LINKS } from '../../config/constants';
 
 export default function Footer() {
   return (
-    <footer className="bg-[var(--footer-bg)] border-t border-[var(--border-theme)] pt-16 pb-8 mt-auto transition-colors duration-300">
-      <div className="max-w-[1280px] mx-auto px-6">
+    <footer className="bg-[var(--footer-bg)] border-t border-[var(--border-theme)] pt-16 pb-8 mt-auto transition-colors duration-300 pb-[max(2rem,env(safe-area-inset-bottom))]">
+      <div className="max-w-[1280px] mx-auto px-6 max-md:px-4">
         <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] gap-12 mb-12 max-md:grid-cols-2 max-md:gap-8 max-sm:grid-cols-1">
           {/* Brand */}
           <div className="flex flex-col gap-4">

@@ -98,13 +98,13 @@ export default function Home() {
   return (
     <div className="overflow-x-hidden">
       {/* ===== HERO SECTION ===== */}
-      <section className="relative min-h-[90vh] flex items-center justify-center p-8 max-md:p-5 max-md:pt-20 max-md:min-h-screen overflow-hidden">
+      <section className="relative min-h-[90vh] flex items-center justify-center p-8 max-md:p-5 max-md:pt-24 max-md:min-h-[100svh] overflow-hidden">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <video ref={videoRef} className="absolute top-1/2 left-1/2 min-w-[120%] min-h-[120%] w-auto h-auto -translate-x-1/2 -translate-y-1/2 scale-[0.85] object-cover max-md:min-w-[180%] max-md:min-h-[180%] max-md:scale-[0.65]" autoPlay muted playsInline loop={false}>
+          <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover scale-[1.15] max-md:scale-100" autoPlay muted playsInline loop={false}>
             <source src={`${B}videos/trailer.mp4`} type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-black/40 z-[1] [data-theme='light']_&:bg-white/30" />
-          <div className="absolute inset-0 z-[2] animate-drift"
+          <div className="absolute inset-0 bg-black/40 z-[1]" />
+          <div className="absolute inset-0 z-[2] animate-drift max-md:hidden"
             style={{
               backgroundImage: `radial-gradient(1px 1px at 10% 20%, var(--text-muted) 50%, transparent 50%),
                 radial-gradient(1px 1px at 30% 60%, var(--text-muted) 50%, transparent 50%),
@@ -163,7 +163,7 @@ export default function Home() {
       </section>
 
       {/* ===== EVENTS SECTION ===== */}
-      <section className="py-24 bg-[var(--bg-elevated)] transition-colors duration-300 max-md:py-16">
+      <section className="py-24 bg-[var(--bg-elevated)] transition-colors duration-300 max-md:py-14">
         <div className="section-container">
           <motion.div
             className="text-center mb-14"
@@ -243,10 +243,10 @@ export default function Home() {
       </section>
 
       {/* ===== CTA SECTION ===== */}
-      <section className="py-24 max-md:py-12">
+      <section className="py-24 max-md:py-12 max-md:px-0">
         <div className="section-container">
           <motion.div
-            className="text-center px-8 pb-16 pt-8 rounded-3xl bg-gradient-to-br from-primary/[0.08] to-primary/[0.03] border border-primary/15 overflow-visible max-md:px-5 max-md:pb-10 max-md:rounded-[18px]"
+            className="text-center px-8 pb-16 pt-8 rounded-3xl bg-gradient-to-br from-primary/[0.08] to-primary/[0.03] border border-primary/15 overflow-visible max-md:px-5 max-md:pb-10 max-md:rounded-[18px] max-md:mx-0"
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}

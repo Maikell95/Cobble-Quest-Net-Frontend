@@ -933,8 +933,8 @@ export default function Wiki() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="font-display text-[2.5rem] font-extrabold text-[var(--text-primary)] mb-2 max-sm:text-[2rem]">Cobbledex</h1>
-            <p className="text-[var(--text-muted)] text-[1.05rem]">Base de datos completa con {allPokemon.length} Pokémon del servidor Cobblemon</p>
+            <h1 className="font-display text-[2.5rem] font-extrabold text-[var(--text-primary)] mb-2 max-sm:text-[1.75rem]">Cobbledex</h1>
+            <p className="text-[var(--text-muted)] text-[1.05rem] max-sm:text-[0.92rem] max-sm:px-2">Base de datos completa con {allPokemon.length} Pokémon del servidor Cobblemon</p>
           </motion.div>
         </div>
       </section>

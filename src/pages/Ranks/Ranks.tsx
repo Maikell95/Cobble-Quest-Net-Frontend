@@ -144,7 +144,7 @@ export default function Ranks() {
           </button>
         </div>
 
-        <div className="grid grid-cols-5 gap-5 items-start max-[1280px]:grid-cols-3 max-[900px]:grid-cols-2 max-sm:grid-cols-1">
+        <div className="grid grid-cols-5 gap-5 items-start max-[1280px]:grid-cols-3 max-[900px]:grid-cols-2 max-sm:grid-cols-1 max-sm:gap-4">
           {RANKS.map((rank, index) => {
             const price = duration === 'monthly' ? rank.monthlyPrice : rank.permanentPrice;
             return (

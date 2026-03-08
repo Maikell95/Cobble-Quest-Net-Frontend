@@ -24,8 +24,8 @@ export default function Navbar() {
   const serverStats = useServerStatus();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[1000] bg-[var(--navbar-bg)] backdrop-blur-[20px] border-b border-[var(--border-theme)] transition-colors duration-300">
-      <div className="max-w-[1280px] mx-auto px-6 h-[70px] flex items-center justify-between max-md:px-4">
+    <nav className="fixed top-0 left-0 right-0 z-[1000] bg-[var(--navbar-bg)] backdrop-blur-[20px] border-b border-[var(--border-theme)] transition-colors duration-300 pt-[env(safe-area-inset-top)]">
+      <div className="max-w-[1280px] mx-auto px-6 h-[70px] flex items-center justify-between max-md:px-4 max-md:h-[60px]">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 no-underline text-[var(--text-primary)] hover:opacity-85 transition-opacity">
           <img src={`${B}images/cobblequest.svg`} alt="Cobble Quest" className="w-9 h-9 rounded-lg object-contain" />
@@ -86,22 +86,22 @@ export default function Navbar() {
           </Link>
 
           {/* Mobile Toggle */}
-          <button className="hidden max-md:block bg-transparent border-none text-[var(--text-secondary)] cursor-pointer p-1" onClick={() => setIsOpen(!isOpen)}>
+          <button className="hidden max-md:flex items-center justify-center bg-transparent border-none text-[var(--text-secondary)] cursor-pointer w-10 h-10 rounded-lg active:bg-[var(--bg-surface-hover)]" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      <div className={`${isOpen ? 'flex' : 'hidden'} flex-col px-6 pb-4 pt-2 gap-1 bg-[var(--navbar-bg)]`}>
+      <div className={`${isOpen ? 'flex' : 'hidden'} flex-col px-6 pb-5 pt-2 gap-0.5 bg-[var(--navbar-bg)] border-b border-[var(--border-theme)]`}>
         {NAV_LINKS.map((link) => (
           <Link
             key={link.path}
             to={link.path}
-            className={`no-underline text-base px-4 py-3 rounded-lg transition-all duration-200 ${
+            className={`no-underline text-base px-4 py-3.5 rounded-xl transition-all duration-200 active:scale-[0.98] ${
               location.pathname === link.path
-                ? 'text-primary bg-primary/10'
-                : 'text-[var(--text-secondary)] hover:text-primary hover:bg-primary/10'
+                ? 'text-primary bg-primary/10 font-semibold'
+                : 'text-[var(--text-secondary)] active:bg-[var(--bg-surface-hover)]'
             }`}
             onClick={() => setIsOpen(false)}
           >
