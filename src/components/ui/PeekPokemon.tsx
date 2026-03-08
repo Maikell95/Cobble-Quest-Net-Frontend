@@ -1,14 +1,15 @@
 import { useState, type ReactNode } from 'react';
 
+const B = import.meta.env.BASE_URL;
 const POKEMON_SPRITES = [
-  '/images/pokemon/pikachu.png',
-  '/images/pokemon/bulbasaur.png',
-  '/images/pokemon/squirtle.png',
-  '/images/pokemon/gengar.png',
-  '/images/pokemon/dragonite.png',
-  '/images/pokemon/dartrix.png',
-  '/images/pokemon/goomy.png',
-  '/images/pokemon/arbok.png',
+  `${B}images/pokemon/pikachu.png`,
+  `${B}images/pokemon/bulbasaur.png`,
+  `${B}images/pokemon/squirtle.png`,
+  `${B}images/pokemon/gengar.png`,
+  `${B}images/pokemon/dragonite.png`,
+  `${B}images/pokemon/dartrix.png`,
+  `${B}images/pokemon/goomy.png`,
+  `${B}images/pokemon/arbok.png`,
 ];
 
 type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';

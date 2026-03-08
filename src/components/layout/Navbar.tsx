@@ -7,12 +7,13 @@ import { useTheme } from '../../context/ThemeContext';
 import { useServerStatus } from '../../hooks/useServerStatus';
 import PeekPokemon from '../ui/PeekPokemon';
 
+const B = import.meta.env.BASE_URL;
 const NAV_POKEMON: Record<string, string> = {
-  '/': '/images/pokemon/pikachu.webp',
-  '/store': '/images/pokemon/gholdengo.webp',
-  '/ranks': '/images/pokemon/mewtwo.webp',
-  '/wiki': '/images/pokemon/slowking.webp',
-  '/support': '/images/pokemon/blissey.webp',
+  '/': `${B}images/pokemon/pikachu.webp`,
+  '/store': `${B}images/pokemon/gholdengo.webp`,
+  '/ranks': `${B}images/pokemon/mewtwo.webp`,
+  '/wiki': `${B}images/pokemon/slowking.webp`,
+  '/support': `${B}images/pokemon/blissey.webp`,
 };
 
 export default function Navbar() {
@@ -27,7 +28,7 @@ export default function Navbar() {
       <div className="max-w-[1280px] mx-auto px-6 h-[70px] flex items-center justify-between max-md:px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 no-underline text-[var(--text-primary)] hover:opacity-85 transition-opacity">
-          <img src="/images/cobblequest.svg" alt="Cobble Quest" className="w-9 h-9 rounded-lg object-contain" />
+          <img src={`${B}images/cobblequest.svg`} alt="Cobble Quest" className="w-9 h-9 rounded-lg object-contain" />
           <span className="font-display text-[1.4rem] font-bold text-[var(--text-primary)] max-[480px]:text-[1.15rem]">{SERVER_CONFIG.name}</span>
         </Link>
 

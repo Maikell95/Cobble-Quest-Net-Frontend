@@ -44,15 +44,16 @@ const events = [
   },
 ];
 
+const B = import.meta.env.BASE_URL;
 const regions = [
-  { name: 'Bosque Esmeralda', image: '/images/regions/gallery_1.webp' },
-  { name: 'Montaña Volcánica', image: '/images/regions/gallery_2.webp' },
-  { name: 'Costa Cristalina', image: '/images/regions/gallery_3.webp' },
-  { name: 'Pradera Dorada', image: '/images/regions/gallery_4.webp' },
-  { name: 'Caverna Profunda', image: '/images/regions/gallery_5.webp' },
-  { name: 'Isla Tropical', image: '/images/regions/gallery_6.webp' },
-  { name: 'Ciudad Nocturna', image: '/images/regions/gallery_7.webp' },
-  { name: 'Valle Nevado', image: '/images/regions/gallery_8.webp' },
+  { name: 'Bosque Esmeralda', image: `${B}images/regions/gallery_1.webp` },
+  { name: 'Montaña Volcánica', image: `${B}images/regions/gallery_2.webp` },
+  { name: 'Costa Cristalina', image: `${B}images/regions/gallery_3.webp` },
+  { name: 'Pradera Dorada', image: `${B}images/regions/gallery_4.webp` },
+  { name: 'Caverna Profunda', image: `${B}images/regions/gallery_5.webp` },
+  { name: 'Isla Tropical', image: `${B}images/regions/gallery_6.webp` },
+  { name: 'Ciudad Nocturna', image: `${B}images/regions/gallery_7.webp` },
+  { name: 'Valle Nevado', image: `${B}images/regions/gallery_8.webp` },
 ];
 
 const VIDEO_MAX_TIME = 235; // 3 minutes 55 seconds
@@ -100,7 +101,7 @@ export default function Home() {
       <section className="relative min-h-[90vh] flex items-center justify-center p-8 max-md:p-5 max-md:pt-20 max-md:min-h-screen overflow-hidden">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <video ref={videoRef} className="absolute top-1/2 left-1/2 min-w-[120%] min-h-[120%] w-auto h-auto -translate-x-1/2 -translate-y-1/2 scale-[0.85] object-cover max-md:min-w-[180%] max-md:min-h-[180%] max-md:scale-[0.65]" autoPlay muted playsInline loop={false}>
-            <source src="/videos/trailer.mp4" type="video/mp4" />
+            <source src={`${B}videos/trailer.mp4`} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-black/40 z-[1] [data-theme='light']_&:bg-white/30" />
           <div className="absolute inset-0 z-[2] animate-drift"
@@ -252,7 +253,7 @@ export default function Home() {
             transition={{ duration: 0.6 }}
           >
             <img
-              src="/images/party_group.webp"
+              src={`${B}images/party_group.webp`}
               alt="Pokémon Party Group"
               className="w-[280px] max-w-[80%] h-auto mx-auto block relative z-[1] -translate-y-[40%] -mb-12 drop-shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
             />

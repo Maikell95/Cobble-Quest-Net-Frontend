@@ -870,7 +870,7 @@ export default function Wiki() {
 
   // Load data
   useEffect(() => {
-    fetch('/data/pokemon.json')
+    fetch(`${import.meta.env.BASE_URL}data/pokemon.json`)
       .then((r) => r.json())
       .then((data: Pokemon[]) => {
         setAllPokemon(data);

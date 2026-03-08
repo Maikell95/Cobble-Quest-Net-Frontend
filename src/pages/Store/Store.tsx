@@ -4,12 +4,13 @@ import { Search, Filter, ShoppingCart, Star, Sparkles } from 'lucide-react';
 import { RARITY_COLORS, CURRENCY_SYMBOL } from '../../config/constants';
 
 // Placeholder data — will be replaced with real data later
+const B = import.meta.env.BASE_URL;
 const CATEGORIES = [
   { id: 'all', label: 'Todo', image: '' },
-  { id: 'keys', label: 'Llaves', image: '/images/store/gilded-chest.png' },
-  { id: 'breeding', label: 'Crianza', image: '/images/store/pasture-block.png' },
-  { id: 'battlepass', label: 'Pase de Batalla', image: '/images/store/kings-rock.png' },
-  { id: 'extras', label: 'Extras', image: '/images/store/relic-coin.png' },
+  { id: 'keys', label: 'Llaves', image: `${B}images/store/gilded-chest.png` },
+  { id: 'breeding', label: 'Crianza', image: `${B}images/store/pasture-block.png` },
+  { id: 'battlepass', label: 'Pase de Batalla', image: `${B}images/store/kings-rock.png` },
+  { id: 'extras', label: 'Extras', image: `${B}images/store/relic-coin.png` },
 ];
 
 const PLACEHOLDER_ITEMS = [
