@@ -4,8 +4,8 @@ import './index.css';
 import App from './App';
 import { prefetchPokemon } from './data/pokemonCache';
 
-// Start downloading pokemon.json immediately, before any component mounts
-prefetchPokemon();
+// Defer pokemon prefetch so it doesn't compete with critical page resources
+requestIdleCallback?.(() => prefetchPokemon()) ?? setTimeout(prefetchPokemon, 1000);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
