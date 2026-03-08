@@ -34,7 +34,7 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="flex gap-1 max-md:hidden">
-          {NAV_LINKS.map((link, i) => (
+          {NAV_LINKS.map((link) => (
             <PeekPokemon key={link.path} corner="top-right" size={30} sprite={NAV_POKEMON[link.path]}>
               <Link
                 to={link.path}
