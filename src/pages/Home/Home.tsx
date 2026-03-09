@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Copy, Check, ChevronRight } from 'lucide-react';
+import { Copy, Check, ChevronRight, Download } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { SERVER_CONFIG } from '../../config/constants';
 import { useServerStatus } from '../../hooks/useServerStatus';
@@ -122,6 +122,14 @@ export default function Home() {
             <Link to="/store" className="flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white no-underline font-semibold text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(220,38,38,0.35)] max-md:w-full max-md:justify-center">
               Visitar Tienda <ChevronRight size={18} />
             </Link>
+            <a
+              href={SERVER_CONFIG.modpack}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-7 py-3 rounded-xl bg-[#1bd96a] text-white no-underline font-semibold text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(27,217,106,0.35)] max-md:w-full max-md:justify-center"
+            >
+              <Download size={18} /> Descargar Mods
+            </a>
           </div>
 
           <p className="mt-6 text-[var(--text-muted)] text-[0.85rem] max-md:text-[0.8rem]">

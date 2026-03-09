@@ -6,104 +6,113 @@ import './Ranks.css';
 
 type Duration = 'monthly' | 'permanent';
 
+interface Feature {
+  text: string;
+  wide?: boolean;
+}
+
 const RANKS = [
   {
     id: 1,
     name: 'Super',
-    monthlyPrice: 2.99,
-    permanentPrice: 9.99,
+    monthlyPrice: 4.99,
+    permanentPrice: 14.99,
     color: '#55ff55',
     icon: <Star size={28} />,
     description: 'El primer paso en tu aventura. Ventajas básicas para empezar.',
     features: [
-      'Acceso a /fly en spawn',
-      '2 homes adicionales',
-      'Kit Super semanal',
-      'Tag [Super] en chat',
-      'Acceso a cosméticos básicos',
-    ],
+      { text: '3 Llaves Pokemon Random' },
+      { text: '125 000 Dólares en el juego semanales' },
+      { text: '8 caramelos raros semanales' },
+      { text: 'Ahora puedes tener 2 /home set' },
+      { text: '2% de descuento en casi todas las tiendas' },
+      { text: 'Acceso a la tienda de raids Premium' },
+      { text: 'Acceso a comandos como /pokeshout y /egginfo', wide: true },
+      { text: 'Acceso al /kit super semanal' },
+    ] as Feature[],
   },
   {
     id: 2,
-    name: 'Honor',
-    monthlyPrice: 5.99,
-    permanentPrice: 19.99,
-    color: '#5599ff',
-    icon: <Shield size={28} />,
-    description: 'Para entrenadores dedicados que buscan más poder y estilo.',
-    features: [
-      'Todo de Super +',
-      'Acceso a /fly en todo el mundo',
-      '5 homes adicionales',
-      'Kit Honor semanal (mejor loot)',
-      'Tag [Honor] en chat con color',
-      'Partículas personalizadas',
-      'Acceso a Pokémon shiny spawn',
-    ],
-  },
-  {
-    id: 3,
     name: 'Ultra',
     monthlyPrice: 9.99,
-    permanentPrice: 34.99,
+    permanentPrice: 29.99,
     color: '#aa55ff',
     icon: <Zap size={28} />,
     description: 'Demuestra tu dominio con privilegios de élite en el servidor.',
     features: [
-      'Todo de Honor +',
-      '10 homes adicionales',
-      'Kit Ultra semanal (premium)',
-      'Acceso a /heal',
-      'Tag [Ultra] animado',
-      'Montura exclusiva',
-      'Prioridad en cola de servidor',
-      'Chat con colores RGB',
-    ],
+      { text: '6 Llaves Pokemon Random' },
+      { text: '200 000 Dólares en el juego semanales' },
+      { text: '16 caramelos raros semanales' },
+      { text: 'Ahora puedes tener 3 /home set' },
+      { text: '4% de descuento en casi todas las tiendas' },
+      { text: 'Acceso a la tienda de raids Premium' },
+      { text: 'Acceso a comandos como /pokeshout, /egginfo, /pc y /enderchest', wide: true },
+      { text: 'Acceso al /kit ultra semanal' },
+    ] as Feature[],
+  },
+  {
+    id: 3,
+    name: 'Honor',
+    monthlyPrice: 19.99,
+    permanentPrice: 44.99,
+    color: '#5599ff',
+    icon: <Shield size={28} />,
+    description: 'Para entrenadores dedicados que buscan más poder y estilo.',
+    features: [
+      { text: '9 Llaves Pokemon Random' },
+      { text: '375 000 Dólares en el juego semanales' },
+      { text: '32 caramelos raros semanales' },
+      { text: 'Ahora puedes tener 3 /home set' },
+      { text: '6% de descuento en casi todas las tiendas' },
+      { text: 'Acceso a la tienda de raids Premium' },
+      { text: 'Acceso a comandos como /pokeshout, /egginfo, /pc, /anvil y /enderchest', wide: true },
+      { text: 'Acceso al /kit honor semanal' },
+    ] as Feature[],
     popular: true,
   },
   {
     id: 4,
     name: 'Luxury',
-    monthlyPrice: 14.99,
-    permanentPrice: 49.99,
+    monthlyPrice: 29.99,
+    permanentPrice: 59.99,
     color: '#F472B6',
     icon: <Gem size={28} />,
     description: 'Lujo total con acceso a contenido premium y eventos VIP.',
     features: [
-      'Todo de Ultra +',
-      'Homes ilimitados',
-      'Kit Luxury semanal (legendario)',
-      'Acceso a /pokeheal',
-      'Tag [Luxury] animado dorado',
-      'Aura exclusiva',
-      'Acceso anticipado a eventos',
-      'Soporte VIP prioritario',
-    ],
+      { text: '12 Llaves Pokemon Random' },
+      { text: '500 000 Dólares en el juego semanales' },
+      { text: '64 caramelos raros semanales' },
+      { text: 'Ahora puedes tener 4 /home set' },
+      { text: '8% de descuento en casi todas las tiendas' },
+      { text: 'Acceso a la tienda de raids Premium' },
+      { text: 'Todos los comandos de Honor más /pokeshoutallme, /feed, /fly, /forcehatch y /opendaycare', wide: true },
+      { text: 'Acceso al /kit luxury semanal' },
+    ] as Feature[],
   },
   {
     id: 5,
     name: 'Master',
-    monthlyPrice: 19.99,
-    permanentPrice: 69.99,
+    monthlyPrice: 34.99,
+    permanentPrice: 74.99,
     color: '#FFD93D',
     icon: <Crown size={28} />,
     description: 'El rango supremo. Todos los privilegios y máximo prestigio.',
     features: [
-      'Todo de Luxury +',
-      '1 Pokémon legendario al mes',
-      'Kit Master semanal (mítico)',
-      'Acceso a zonas exclusivas',
-      'Tag [Master] animado arcoíris',
-      'Mascota cosmética exclusiva',
-      'Doble exp. en eventos',
-      'Rol exclusivo en Discord',
-    ],
+      { text: '15 Llaves Pokemon Random' },
+      { text: '980 000 Dólares en el juego semanales' },
+      { text: '100 caramelos raros semanales' },
+      { text: 'Ahora puedes tener 5 /home set' },
+      { text: '10% de descuento en casi todas las tiendas' },
+      { text: 'Acceso a la tienda de raids Premium' },
+      { text: 'Todoslos comandos de Luxury más /heal, /grindstone, /stonecutter, /cartography, /craft, /healpokemon y /repair', wide: true },
+      { text: 'Acceso al /kit master semanal' },
+    ] as Feature[],
   },
 ];
 
 export default function Ranks() {
   const [duration, setDuration] = useState<Duration>('permanent');
-  const [activeIndex, setActiveIndex] = useState(2); // Ultra (popular) as default
+  const [activeIndex, setActiveIndex] = useState(2); // Honor (popular) as default
 
   const activeRank = RANKS[activeIndex];
   const price = duration === 'monthly' ? activeRank.monthlyPrice : activeRank.permanentPrice;
@@ -224,14 +233,14 @@ export default function Ranks() {
             <div className="rank-detail-features">
               {activeRank.features.map((feature, i) => (
                 <motion.div
-                  key={feature}
-                  className="rank-detail-feature"
+                  key={feature.text}
+                  className={`rank-detail-feature${feature.wide ? ' rank-feature-wide' : ''}`}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25, delay: i * 0.03 }}
                 >
                   <Check size={16} style={{ color: activeRank.color }} className="shrink-0" />
-                  <span>{feature}</span>
+                  <span>{feature.text}</span>
                 </motion.div>
               ))}
             </div>

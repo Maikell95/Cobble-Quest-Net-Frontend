@@ -212,6 +212,9 @@
   position: relative;
   z-index: 1;
 }
+.rank-feature-wide {
+  grid-column: 1 / -1;
+}
 .rank-detail-feature {
   display: flex;
   align-items: center;

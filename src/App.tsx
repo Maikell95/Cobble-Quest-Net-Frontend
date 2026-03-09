@@ -10,6 +10,7 @@ const Ranks = lazy(() => import('./pages/Ranks/Ranks'));
 const Wiki = lazy(() => import('./pages/Wiki/Wiki'));
 const Support = lazy(() => import('./pages/Support/Support'));
 const Cart = lazy(() => import('./pages/Cart/Cart'));
+const Admin = lazy(() => import('./pages/Admin/Admin'));
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
                 <Route path="wiki" element={<Wiki />} />
                 <Route path="support" element={<Support />} />
                 <Route path="cart" element={<Cart />} />
+                <Route path="admin" element={<Admin />} />
               </Route>
             </Routes>
           </Suspense>

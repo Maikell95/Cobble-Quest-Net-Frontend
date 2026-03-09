@@ -8,6 +8,7 @@ export const SERVER_CONFIG = {
   version: '1.21.1',
   discord: 'https://discord.com/invite/3pqqysGqyf',
   discordTicket: 'https://discord.com/channels/892503948420853771/1452772962838118581',
+  modpack: 'https://modrinth.com/modpack/cobble-quest',
   description:
     'El mejor servidor de Cobblemon. Explora, captura y batalla en una experiencia única de Pokémon × Minecraft.',
 };
