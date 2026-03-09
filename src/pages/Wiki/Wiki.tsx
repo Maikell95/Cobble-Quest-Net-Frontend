@@ -404,7 +404,7 @@ function PokemonCard({ pokemon, onClick }: { pokemon: Pokemon; onClick: () => vo
 }
 
 // ===== StatBar =====
-function StatBar({ label, value, max = 255 }: { label: string; value: number; max?: number }) {
+function StatBar({ label, value, max = 255, index = 0 }: { label: string; value: number; max?: number; index?: number }) {
   const pct = Math.min((value / max) * 100, 100);
   const color =
     value >= 150
@@ -417,7 +417,12 @@ function StatBar({ label, value, max = 255 }: { label: string; value: number; ma
             ? '#f97316'
             : '#ef4444';
   return (
-    <div className="stat-bar-row">
+    <motion.div
+      className="stat-bar-row"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.06 }}
+    >
       <span className="stat-label">{label}</span>
       <span className="stat-value">{value}</span>
       <div className="stat-bar-bg">
@@ -425,11 +430,11 @@ function StatBar({ label, value, max = 255 }: { label: string; value: number; ma
           className="stat-bar-fill"
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ duration: 0.5, delay: 0.15 + index * 0.06, ease: 'easeOut' }}
           style={{ background: color }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -478,17 +483,18 @@ function PokemonModal({
   return (
     <motion.div
       className="poke-modal-overlay"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+      animate={{ opacity: 1, backdropFilter: 'blur(8px)' }}
+      exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+      transition={{ duration: 0.25 }}
       onClick={onClose}
     >
       <motion.div
         className="poke-modal"
-        initial={{ opacity: 0, scale: 0.9, y: 40 }}
+        initial={{ opacity: 0, scale: 0.85, y: 60 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 40 }}
-        transition={{ duration: 0.3 }}
+        exit={{ opacity: 0, scale: 0.9, y: 30 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 26, mass: 0.8 }}
         onClick={(e) => e.stopPropagation()}
         style={{ '--type-color': TYPE_COLORS[mainType] || '#888' } as React.CSSProperties}
       >
@@ -498,21 +504,38 @@ function PokemonModal({
 
         {/* Header */}
         <div className="poke-modal-header">
-          <div className="poke-modal-img-wrap">
+          <motion.div
+            className="poke-modal-img-wrap"
+            initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.1 }}
+          >
             <img src={getPokemonImage(pokemon.id)} alt={pokemon.name} />
-          </div>
-          <div className="poke-modal-title">
+          </motion.div>
+          <motion.div
+            className="poke-modal-title"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 24, delay: 0.15 }}
+          >
             <span className="poke-modal-number">#{String(pokemon.id).padStart(4, '0')}</span>
             <h2>{pokemon.name}</h2>
             <div className="poke-card-types">
-              {pokemon.types.map((t) => (
-                <span key={t} className="poke-type-badge" style={{ background: TYPE_COLORS[t] }}>
+              {pokemon.types.map((t, i) => (
+                <motion.span
+                  key={t}
+                  className="poke-type-badge"
+                  style={{ background: TYPE_COLORS[t] }}
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.25 + i * 0.08, type: 'spring', stiffness: 300, damping: 20 }}
+                >
                   {translateType(t)}
-                </span>
+                </motion.span>
               ))}
             </div>
             <span className="poke-modal-gen">Generación {pokemon.generation}</span>
-          </div>
+          </motion.div>
         </div>
 
         {/* Tabs */}
@@ -539,11 +562,19 @@ function PokemonModal({
 
         {/* Tab Content */}
         <div className="poke-modal-content">
+          <AnimatePresence mode="wait">
           {activeTab === 'stats' && (
-            <div className="poke-tab-stats">
+            <motion.div
+              key="tab-stats"
+              className="poke-tab-stats"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
               <div className="stats-bars">
-                {Object.entries(pokemon.stats).map(([key, val]) => (
-                  <StatBar key={key} label={formatStatName(key)} value={val as number} />
+                {Object.entries(pokemon.stats).map(([key, val], i) => (
+                  <StatBar key={key} label={formatStatName(key)} value={val as number} index={i} />
                 ))}
                 <div className="stat-bar-row stat-total">
                   <span className="stat-label">Total</span>
@@ -599,11 +630,18 @@ function PokemonModal({
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
           )}
 
           {activeTab === 'moves' && (
-            <div className="poke-tab-moves">
+            <motion.div
+              key="tab-moves"
+              className="poke-tab-moves"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
               {pokemon.moves.level.length > 0 && (
                 <div className="moves-section">
                   <h4>Por Nivel</h4>
@@ -653,11 +691,18 @@ function PokemonModal({
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
           )}
 
           {activeTab === 'details' && (
-            <div className="poke-tab-details">
+            <motion.div
+              key="tab-details"
+              className="poke-tab-details"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
               <div className="details-grid">
                 <div className="detail-item">
                   <span className="detail-label">Altura</span>
@@ -854,8 +899,9 @@ function PokemonModal({
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </motion.div>
