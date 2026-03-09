@@ -12,6 +12,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
+    <!-- Redirect to homepage on refresh -->
+    <script>
+      (function() {
+        var base = '/CBQ/';
+        var isReload = performance.navigation
+          ? performance.navigation.type === 1
+          : performance.getEntriesByType('navigation')[0]?.type === 'reload';
+        if (isReload && window.location.pathname !== base) {
+          window.location.replace(base);
+        }
+      })();
+    </script>
     <!-- SPA redirect handler for GitHub Pages 404.html -->
     <script>
       (function(l) {
