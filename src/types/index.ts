@@ -21,5 +21,5 @@ export interface CartItem {
 export interface ServerStats {
   playersOnline: number;
   maxPlayers: number;
-  serverStatus: 'online' | 'offline' | 'maintenance';
+  serverStatus: 'online' | 'offline' | 'maintenance' | 'checking';
 }

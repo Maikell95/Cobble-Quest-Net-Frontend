@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Check, Crown, Star, Zap, Gem, Shield, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Crown, Star, Zap, Gem, Shield, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../config/constants';
+import './Ranks.css';
 
 type Duration = 'monthly' | 'permanent';
 
@@ -102,23 +103,28 @@ const RANKS = [
 
 export default function Ranks() {
   const [duration, setDuration] = useState<Duration>('permanent');
+  const [activeIndex, setActiveIndex] = useState(2); // Ultra (popular) as default
+
+  const activeRank = RANKS[activeIndex];
+  const price = duration === 'monthly' ? activeRank.monthlyPrice : activeRank.permanentPrice;
+
+  const navigate = (dir: -1 | 1) => {
+    setActiveIndex((prev) => (prev + dir + RANKS.length) % RANKS.length);
+  };
 
   return (
     <div className="min-h-screen">
-      <section className="pt-16 pb-8 text-center bg-gradient-to-b from-primary/[0.06] to-transparent relative z-[1]">
+      {/* Header */}
+      <section className="pt-16 pb-4 text-center bg-gradient-to-b from-primary/[0.06] to-transparent relative z-[1]">
         <div className="section-container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="font-display text-[2.5rem] font-extrabold text-[var(--text-primary)] mb-2 max-sm:text-[1.75rem]">Rangos</h1>
-            <p className="text-[var(--text-muted)] text-[1.05rem]">Elige tu rango y desbloquea ventajas exclusivas en el servidor</p>
+            <p className="text-[var(--text-muted)] text-[1.05rem]">Elige tu rango y desbloquea ventajas exclusivas</p>
           </motion.div>
         </div>
       </section>
 
-      <div className="section-container pt-8 pb-16">
+      <div className="section-container pt-4 pb-16">
         {/* Duration Toggle */}
         <div className="flex justify-center gap-2 mb-8 bg-[var(--bg-surface)] border border-[var(--border-theme)] rounded-[14px] p-[0.35rem] w-fit mx-auto max-sm:w-full">
           <button
@@ -144,70 +150,103 @@ export default function Ranks() {
           </button>
         </div>
 
-        <div className="grid grid-cols-5 gap-5 items-start max-[1280px]:grid-cols-3 max-[900px]:grid-cols-2 max-sm:grid-cols-1 max-sm:gap-4">
-          {RANKS.map((rank, index) => {
-            const price = duration === 'monthly' ? rank.monthlyPrice : rank.permanentPrice;
-            return (
-              <motion.div
-                key={rank.id}
-                className={`relative bg-[var(--bg-card)] border rounded-[20px] p-8 px-6 transition-all duration-300 flex flex-col items-center text-center hover:-translate-y-1 hover:shadow-[var(--shadow-lg)] ${
-                  rank.popular
-                    ? 'border-[rgba(85,153,255,0.4)] shadow-[0_0_30px_rgba(85,153,255,0.06)]'
-                    : 'border-[var(--border-theme)]'
-                }`}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                {rank.popular && (
-                  <div className="absolute -top-3 flex items-center gap-1.5 px-4 py-1 rounded-full bg-gradient-to-br from-[#5599ff] to-[#3377ee] text-white text-[0.78rem] font-bold">
-                    <Sparkles size={14} /> Más Popular
-                  </div>
-                )}
+        {/* Circular Rank Selector */}
+        <div className="rank-carousel">
+          <button className="carousel-arrow carousel-arrow-left" onClick={() => navigate(-1)} aria-label="Anterior">
+            <ChevronLeft size={24} />
+          </button>
 
-                <div
-                  className="w-[60px] h-[60px] rounded-2xl flex items-center justify-center mb-4"
-                  style={{ color: rank.color, background: `${rank.color}15` }}
-                >
-                  {rank.icon}
-                </div>
-
-                <h3 className="font-display text-[1.4rem] font-bold mb-2" style={{ color: rank.color }}>
-                  {rank.name}
-                </h3>
-                <p className="text-[var(--text-muted)] text-[0.88rem] leading-relaxed mb-6">{rank.description}</p>
-
-                <div className="flex items-baseline gap-0.5 mb-6">
-                  <span className="text-[var(--text-secondary)] text-[1.2rem] font-semibold">{CURRENCY_SYMBOL}</span>
-                  <span className="text-[var(--text-primary)] text-[2.5rem] font-extrabold leading-none">{price.toFixed(2)}</span>
-                  <span className="text-[var(--text-muted)] text-[0.82rem] ml-1">/ {duration === 'monthly' ? 'mes' : 'permanente'}</span>
-                </div>
-
-                <div className="w-full flex flex-col gap-2.5 mb-6 text-left">
-                  {rank.features.map((feature, i) => (
-                    <div key={i} className="flex items-center gap-2.5 text-[var(--text-secondary)] text-[0.88rem]">
-                      <Check size={16} className="shrink-0" style={{ color: rank.color }} />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  className="w-full py-3.5 rounded-xl font-bold text-[0.95rem] cursor-pointer transition-all duration-300 mt-auto hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.2)]"
-                  style={{
-                    background: rank.popular
-                      ? `linear-gradient(135deg, ${rank.color}, ${rank.color}cc)`
-                      : 'rgba(255, 255, 255, 0.06)',
-                    color: rank.popular ? '#000' : rank.color,
-                    border: rank.popular ? 'none' : `1px solid ${rank.color}33`,
+          <div className="carousel-ring">
+            {RANKS.map((rank, index) => {
+              const offset = ((index - activeIndex + RANKS.length + 2) % RANKS.length) - 2;
+              const isActive = index === activeIndex;
+              const absOff = Math.abs(offset);
+              return (
+                <motion.button
+                  key={rank.id}
+                  className={`carousel-node ${isActive ? 'active' : ''}`}
+                  style={{ '--node-color': rank.color } as React.CSSProperties}
+                  animate={{
+                    opacity: isActive ? 1 : 1 - absOff * 0.25,
+                    scale: isActive ? 1.15 : 1 - absOff * 0.1,
                   }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  onClick={() => setActiveIndex(index)}
+                  aria-label={rank.name}
                 >
-                  Comprar {rank.name}
-                </button>
-              </motion.div>
-            );
-          })}
+                  <div className="carousel-node-icon">{rank.icon}</div>
+                  <span className="carousel-node-name">{rank.name}</span>
+                  {rank.popular && !isActive && (
+                    <span className="carousel-popular-dot"><Sparkles size={10} /></span>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <button className="carousel-arrow carousel-arrow-right" onClick={() => navigate(1)} aria-label="Siguiente">
+            <ChevronRight size={24} />
+          </button>
         </div>
+
+        {/* Active Rank Detail */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeRank.id}
+            className="rank-detail"
+            style={{ '--rank-color': activeRank.color } as React.CSSProperties}
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+          >
+            {activeRank.popular && (
+              <div className="rank-detail-popular">
+                <Sparkles size={14} /> Más Popular
+              </div>
+            )}
+
+            <div className="rank-detail-header">
+              <div className="rank-detail-icon" style={{ color: activeRank.color, background: `${activeRank.color}15` }}>
+                {activeRank.icon}
+              </div>
+              <div>
+                <h2 className="font-display" style={{ color: activeRank.color }}>{activeRank.name}</h2>
+                <p>{activeRank.description}</p>
+              </div>
+              <div className="rank-detail-price">
+                <span className="price-currency">{CURRENCY_SYMBOL}</span>
+                <span className="price-amount">{price.toFixed(2)}</span>
+                <span className="price-period">/ {duration === 'monthly' ? 'mes' : 'perm.'}</span>
+              </div>
+            </div>
+
+            <div className="rank-detail-features">
+              {activeRank.features.map((feature, i) => (
+                <motion.div
+                  key={feature}
+                  className="rank-detail-feature"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25, delay: i * 0.03 }}
+                >
+                  <Check size={16} style={{ color: activeRank.color }} className="shrink-0" />
+                  <span>{feature}</span>
+                </motion.div>
+              ))}
+            </div>
+
+            <button
+              className="rank-detail-buy"
+              style={{
+                background: `linear-gradient(135deg, ${activeRank.color}, ${activeRank.color}cc)`,
+                color: '#000',
+              }}
+            >
+              Comprar {activeRank.name}
+            </button>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Info */}
         <motion.div

@@ -6,7 +6,7 @@
 
 @theme {
   --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-display: 'Poppins', sans-serif;
+  --font-display: 'Silkscreen', cursive;
   --font-mono: 'JetBrains Mono', monospace;
 
   --color-primary: #dc2626;
@@ -171,15 +171,6 @@
     button, a { -webkit-tap-highlight-color: transparent; }
   }
 
-  /* Reduced motion for accessibility & battery saving */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
   ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
@@ -279,7 +270,7 @@
 
   .poke-card-info { padding: 0.5rem 0.8rem 0.8rem; text-align: center; }
   .poke-card-number { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
-  .poke-card-name { font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin: 0.1rem 0 0.35rem; text-transform: capitalize; }
+  .poke-card-name { font-family: 'Silkscreen', cursive; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin: 0.1rem 0 0.35rem; text-transform: capitalize; }
   .poke-card-types { display: flex; gap: 0.3rem; justify-content: center; flex-wrap: wrap; }
   .poke-type-badge { padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.65rem; font-weight: 600; color: #fff; text-transform: capitalize; letter-spacing: 0.3px; }
 
@@ -300,7 +291,7 @@
     margin-bottom: 0.75rem;
   }
   .filter-section-header h4 {
-    font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 700;
+    font-family: 'Silkscreen', cursive; font-size: 0.9rem; font-weight: 700;
     color: var(--text-primary); letter-spacing: 0.02em; margin: 0;
   }
   .filter-active-badge {
@@ -348,7 +339,7 @@
   }
   .gen-filter-btn .gen-number {
     font-size: 1.1rem; font-weight: 800; line-height: 1;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Silkscreen', cursive;
   }
   .gen-filter-btn .gen-label {
     font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
@@ -437,7 +428,7 @@
   .poke-modal-img-wrap { flex-shrink: 0; }
   .poke-modal-img-wrap img { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2)); }
 
-  .poke-modal-title h2 { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text-primary); text-transform: capitalize; margin: 0.2rem 0 0.4rem; }
+  .poke-modal-title h2 { font-family: 'Silkscreen', cursive; font-size: 1.5rem; font-weight: 700; color: var(--text-primary); text-transform: capitalize; margin: 0.2rem 0 0.4rem; }
   .poke-modal-number { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
   .poke-modal-gen { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.3rem; display: block; }
 
@@ -472,7 +463,7 @@
   .poke-info-block { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
   .poke-info-block h4 {
     display: flex; align-items: center; gap: 0.4rem;
-    font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600;
+    font-family: 'Silkscreen', cursive; font-size: 0.85rem; font-weight: 600;
     color: var(--text-secondary); margin-bottom: 0.6rem;
   }
 
@@ -497,7 +488,7 @@
 
   /* Moves */
   .poke-tab-moves { display: flex; flex-direction: column; gap: 1.2rem; }
-  .moves-section h4 { font-family: 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .moves-section h4 { font-family: 'Silkscreen', cursive; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
   .moves-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.3rem; }
   .move-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.6rem; border-radius: 6px; background: var(--bg-surface); font-size: 0.78rem; }
   .move-level { font-weight: 700; color: #dc2626; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; min-width: 32px; }

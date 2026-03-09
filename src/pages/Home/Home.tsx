@@ -1,59 +1,20 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Copy, Check, ChevronRight, Calendar, Trophy, Gift, Star, MapPin } from 'lucide-react';
+import { Copy, Check, ChevronRight } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { SERVER_CONFIG } from '../../config/constants';
 import { useServerStatus } from '../../hooks/useServerStatus';
 
-const events = [
-  {
-    icon: <Trophy size={28} />,
-    title: 'Torneo Semanal PvP',
-    date: 'Todos los sábados - 8:00 PM',
-    description:
-      'Compite contra los mejores entrenadores del servidor en batallas 6v6. Premios exclusivos para los 3 primeros lugares incluyendo shinies y objetos raros.',
-    tag: 'Competitivo',
-    tagColor: '#DC2626',
-  },
-  {
-    icon: <Gift size={28} />,
-    title: 'Caza de Shinies',
-    date: 'Cada 2 semanas - Viernes',
-    description:
-      'Evento especial con tasas de aparición de shiny aumentadas x5. El primero en capturar un shiny legendario gana recompensas únicas.',
-    tag: 'Evento Especial',
-    tagColor: '#F59E0B',
-  },
-  {
-    icon: <Star size={28} />,
-    title: 'Safari Zone',
-    date: 'Primer domingo del mes',
-    description:
-      'Accede a una zona exclusiva con Pokémon raros que no aparecen en ningún otro lugar del mapa. Pokéballs limitadas, ¡elige sabiamente!',
-    tag: 'Mensual',
-    tagColor: '#10B981',
-  },
-  {
-    icon: <Calendar size={28} />,
-    title: 'Raid Legendario',
-    date: 'Miércoles y domingos - 9:00 PM',
-    description:
-      'Únete a otros entrenadores para enfrentar Pokémon legendarios en batallas raid cooperativas. Trabaja en equipo para capturarlos.',
-    tag: 'Cooperativo',
-    tagColor: '#6366F1',
-  },
-];
-
 const B = import.meta.env.BASE_URL;
 const regions = [
-  { name: 'Bosque Esmeralda', image: `${B}images/regions/gallery_1.webp` },
-  { name: 'Montaña Volcánica', image: `${B}images/regions/gallery_2.webp` },
-  { name: 'Costa Cristalina', image: `${B}images/regions/gallery_3.webp` },
-  { name: 'Pradera Dorada', image: `${B}images/regions/gallery_4.webp` },
-  { name: 'Caverna Profunda', image: `${B}images/regions/gallery_5.webp` },
-  { name: 'Isla Tropical', image: `${B}images/regions/gallery_6.webp` },
-  { name: 'Ciudad Nocturna', image: `${B}images/regions/gallery_7.webp` },
-  { name: 'Valle Nevado', image: `${B}images/regions/gallery_8.webp` },
+  { image: `${B}images/regions/gallery_1.webp` },
+  { image: `${B}images/regions/gallery_2.webp` },
+  { image: `${B}images/regions/gallery_3.webp` },
+  { image: `${B}images/regions/gallery_4.webp` },
+  { image: `${B}images/regions/gallery_5.webp` },
+  { image: `${B}images/regions/gallery_6.webp` },
+  { image: `${B}images/regions/gallery_7.webp` },
+  { image: `${B}images/regions/gallery_8.webp` },
 ];
 
 const VIDEO_MAX_TIME = 235; // 3 minutes 55 seconds
@@ -103,7 +64,7 @@ export default function Home() {
             <source src={`${B}videos/trailer.mp4`} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-black/40 z-[1]" />
-          <div className="absolute inset-0 z-[2] animate-drift max-md:hidden"
+          <div className="absolute inset-0 z-[2] animate-drift"
             style={{
               backgroundImage: `radial-gradient(1px 1px at 10% 20%, var(--text-muted) 50%, transparent 50%),
                 radial-gradient(1px 1px at 30% 60%, var(--text-muted) 50%, transparent 50%),
@@ -131,10 +92,18 @@ export default function Home() {
           transition={{ duration: 0.8 }}
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--bg-surface)] border border-[var(--border-theme)] text-[0.85rem] text-[var(--text-secondary)] mb-6 max-md:text-[0.8rem] max-md:px-3.5 max-md:py-[0.35rem]">
-            <span className={`w-2 h-2 rounded-full ${serverStats.serverStatus === 'online' ? 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]' : ''}`} />
+            <span className={`w-2 h-2 rounded-full ${
+              serverStats.serverStatus === 'online'
+                ? 'bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]'
+                : serverStats.serverStatus === 'offline'
+                ? 'bg-error shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                : 'bg-warning shadow-[0_0_8px_rgba(245,158,11,0.5)]'
+            }`} />
             {serverStats.serverStatus === 'online'
               ? `${serverStats.playersOnline} jugadores en línea`
-              : 'Servidor en mantenimiento'}
+              : serverStats.serverStatus === 'checking'
+              ? 'Conectando al servidor...'
+              : 'Servidor offline'}
           </div>
 
           <h1 className="font-display text-[clamp(2.5rem,6vw,4rem)] font-extrabold leading-[1.15] text-[var(--text-primary)] mb-5 max-md:text-[clamp(2rem,8vw,2.8rem)]">
@@ -177,31 +146,17 @@ export default function Home() {
             <p className="text-[var(--text-muted)] text-[1.05rem] max-md:text-[0.95rem] max-md:px-2">Participa en eventos únicos con recompensas exclusivas cada semana</p>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1 max-md:gap-4">
-            {events.map((event, index) => (
-              <motion.div
-                key={index}
-                className="bg-[var(--bg-card)] border border-[var(--border-theme)] rounded-[18px] p-8 transition-all duration-300 flex flex-col hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(220,38,38,0.08)] max-md:p-6"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-[52px] h-[52px] rounded-[14px] bg-primary/10 text-primary flex items-center justify-center">{event.icon}</div>
-                  <span className="px-3 py-1 rounded-full text-[0.75rem] font-bold tracking-wide" style={{ background: `${event.tagColor}20`, color: event.tagColor }}>
-                    {event.tag}
-                  </span>
-                </div>
-                <h3 className="text-[var(--text-primary)] font-display text-[1.2rem] font-bold mb-1.5">{event.title}</h3>
-                <span className="inline-flex items-center gap-1.5 text-primary text-[0.82rem] font-semibold mb-3">
-                  <Calendar size={14} />
-                  {event.date}
-                </span>
-                <p className="text-[var(--text-muted)] text-[0.9rem] leading-relaxed">{event.description}</p>
-              </motion.div>
-            ))}
-          </div>
+          <motion.div
+            className="text-center py-16 px-4 rounded-2xl border border-dashed border-[var(--border-theme)] bg-[var(--bg-surface)]"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <img src={`${B}images/pokemon/gastly.webp`} alt="Gastly" className="w-24 h-24 mx-auto mb-4 opacity-30 grayscale" />
+            <h3 className="text-[var(--text-secondary)] text-[1.2rem] font-semibold mb-2">Próximamente</h3>
+            <p className="text-[var(--text-muted)] text-[0.95rem]">Los eventos del servidor se publicarán aquí pronto.</p>
+          </motion.div>
         </div>
       </section>
 
@@ -228,11 +183,7 @@ export default function Home() {
               {[...regions, ...regions].map((region, index) => (
                 <div key={index} className="shrink-0 w-[340px] max-lg:w-[300px] max-md:w-[260px]">
                   <div className="relative rounded-2xl overflow-hidden aspect-[16/10] border border-[var(--border-theme)] transition-all duration-300 hover:border-primary/30 hover:shadow-[0_8px_32px_rgba(220,38,38,0.1)] hover:scale-[1.02]">
-                    <img src={region.image} alt={region.name} loading="lazy" className="w-full h-full object-cover block" />
-                    <div className="absolute bottom-0 left-0 right-0 px-5 py-4 bg-gradient-to-t from-black/75 to-transparent flex items-center gap-2 text-white text-[0.9rem] font-semibold">
-                      <MapPin size={16} className="text-primary-light shrink-0" />
-                      <span>{region.name}</span>
-                    </div>
+                    <img src={region.image} alt="Región del servidor" loading="lazy" className="w-full h-full object-cover block" />
                   </div>
                 </div>
               ))}
@@ -266,8 +217,9 @@ export default function Home() {
                 href={SERVER_CONFIG.discord}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-3 rounded-xl font-semibold no-underline transition-all duration-300 text-base bg-[var(--bg-surface)] border border-[var(--border-theme)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
+                className="flex items-center gap-2 px-8 py-3 rounded-xl font-semibold no-underline transition-all duration-300 text-base bg-[#5865F2] text-white hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(88,101,242,0.35)]"
               >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.332-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.332-.946 2.418-2.157 2.418z"/></svg>
                 Unirse al Discord
               </a>
             </div>

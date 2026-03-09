@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/CBQ/images/cobblequest.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Cobble Quest - El mejor servidor de Cobblemon. Explora, captura y batalla en Minecraft." />
+    <meta name="description" content="Cobble Quest Network - Servidor de Cobblemon en Minecraft." />
     <meta name="theme-color" content="#0a0a1a" />
-    <title>Cobble Quest | Servidor Cobblemon</title>
+    <title>Cobble Quest Network</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <!-- SPA redirect handler for GitHub Pages 404.html -->
@@ -23,7 +23,73 @@
         }
       }(window.location))
     </script>
+    <!-- Initial loading screen -->
+    <style>
+      #initial-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        background: #0a0a1a;
+        transition: opacity 0.5s ease;
+        overflow: hidden;
+      }
+      #initial-loader.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #initial-loader .walker {
+        width: 140px;
+        height: auto;
+        animation: walk-bounce 0.6s ease-in-out infinite, walk-sway 1.2s ease-in-out infinite;
+        filter: drop-shadow(0 8px 16px rgba(99, 102, 241, 0.3));
+      }
+      @keyframes walk-bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+      }
+      @keyframes walk-sway {
+        0%, 100% { transform: translateX(-6px) rotate(-2deg); }
+        50% { transform: translateX(6px) rotate(2deg); }
+      }
+      #initial-loader p {
+        font-family: 'Silkscreen', cursive;
+        color: #a0a0b8;
+        font-size: 0.95rem;
+        letter-spacing: 0.02em;
+      }
+      #initial-loader .dots::after {
+        content: '';
+        animation: dots 1.4s steps(4, end) infinite;
+      }
+      @keyframes dots {
+        0% { content: ''; }
+        25% { content: '.'; }
+        50% { content: '..'; }
+        75% { content: '...'; }
+      }
+    </style>
+    <div id="initial-loader">
+      <img id="loader-img" class="walker" alt="Cargando" />
+      <p>Cargando<span class="dots"></span></p>
+    </div>
     <div id="root"></div>
+    <script>
+      // Use the known base path for the image
+      document.getElementById('loader-img').src = '/CBQ/images/pokemon/croagunk-cobblemon.webp';
+      // Fallback: dismiss after 10s if React fails to load
+      setTimeout(function() {
+        var loader = document.getElementById('initial-loader');
+        if (loader) {
+          loader.classList.add('fade-out');
+          setTimeout(function() { loader.remove(); }, 500);
+        }
+      }, 10000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

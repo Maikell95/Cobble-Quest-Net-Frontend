@@ -1,26 +1,35 @@
 import { useState, useEffect } from 'react';
 import type { ServerStats } from '../types';
+import { SERVER_CONFIG } from '../config/constants';
 
 export function useServerStatus() {
   const [stats, setStats] = useState<ServerStats>({
     playersOnline: 0,
-    maxPlayers: 100,
-    serverStatus: 'online',
+    maxPlayers: 0,
+    serverStatus: 'checking',
   });
 
   useEffect(() => {
-    // TODO: Connect to real Minecraft server status API
-    // For now, simulate server status
-    const simulateStatus = () => {
-      setStats({
-        playersOnline: Math.floor(Math.random() * 80) + 10,
-        maxPlayers: 100,
-        serverStatus: 'online',
-      });
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch(`https://api.mcsrvstat.us/3/${SERVER_CONFIG.ip}`);
+        const data = await res.json();
+        if (data.online) {
+          setStats({
+            playersOnline: data.players?.online ?? 0,
+            maxPlayers: data.players?.max ?? 0,
+            serverStatus: 'online',
+          });
+        } else {
+          setStats((prev) => ({ ...prev, serverStatus: 'offline' }));
+        }
+      } catch {
+        setStats((prev) => ({ ...prev, serverStatus: 'offline' }));
+      }
     };
 
-    simulateStatus();
-    const interval = setInterval(simulateStatus, 30000);
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 60000);
     return () => clearInterval(interval);
   }, []);
 

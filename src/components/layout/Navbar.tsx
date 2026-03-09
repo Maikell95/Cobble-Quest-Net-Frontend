@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X, Sun, Moon } from 'lucide-react';
+import { ShoppingCart, Menu, X } from 'lucide-react';
 import { NAV_LINKS, SERVER_CONFIG } from '../../config/constants';
 import { useCart } from '../../context/CartContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -28,7 +28,7 @@ export default function Navbar() {
       <div className="max-w-[1280px] mx-auto px-6 h-[70px] flex items-center justify-between max-md:px-4 max-md:h-[60px]">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 no-underline text-[var(--text-primary)] hover:opacity-85 transition-opacity">
-          <img src={`${B}images/cobblequest.svg`} alt="Cobble Quest" className="w-9 h-9 rounded-lg object-contain" />
+          <img src={`${B}images/cobblequest.svg`} alt="Cobble Quest Network" className="w-9 h-9 rounded-lg object-contain" />
           <span className="font-display text-[1.4rem] font-bold text-[var(--text-primary)] max-[480px]:text-[1.15rem]">{SERVER_CONFIG.name}</span>
         </Link>
 
@@ -62,17 +62,23 @@ export default function Navbar() {
                 : 'bg-warning shadow-[0_0_8px_rgba(245,158,11,0.5)]'
             }`} />
             <span className="text-[var(--text-secondary)] text-[0.85rem] font-medium max-md:hidden">
-              {serverStats.playersOnline}/{serverStats.maxPlayers}
+              {serverStats.serverStatus === 'checking'
+                ? '...'
+                : `${serverStats.playersOnline}/${serverStats.maxPlayers}`}
             </span>
           </div>
 
           {/* Theme Toggle */}
           <button
-            className="flex items-center justify-center w-[38px] h-[38px] rounded-[10px] bg-[var(--bg-surface)] border border-[var(--border-theme)] text-[var(--text-secondary)] hover:text-primary hover:bg-[var(--bg-surface-hover)] hover:border-[var(--border-hover)] transition-all duration-200 max-[480px]:w-[34px] max-[480px]:h-[34px]"
+            className="flex items-center justify-center w-[38px] h-[38px] rounded-[10px] bg-[var(--bg-surface)] border border-[var(--border-theme)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)] hover:border-[var(--border-hover)] transition-all duration-200 max-[480px]:w-[34px] max-[480px]:h-[34px] overflow-hidden"
             onClick={toggleTheme}
             aria-label="Cambiar tema"
           >
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            <img
+              src={`${B}images/icons/${theme === 'dark' ? 'solgaleo' : 'lunala'}.svg`}
+              alt={theme === 'dark' ? 'Solgaleo' : 'Lunala'}
+              className="w-[22px] h-[22px] object-contain transition-transform duration-300 hover:scale-115 max-[480px]:w-[18px] max-[480px]:h-[18px]"
+            />
           </button>
 
           {/* Cart */}

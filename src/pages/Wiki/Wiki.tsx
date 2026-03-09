@@ -332,7 +332,9 @@ function formatCapitalize(s: string) {
   return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function formatMoveName(move: string) {
+function formatMoveName(move: string, movesEs: Record<string, string>) {
+  const spanish = movesEs[move];
+  if (spanish) return spanish;
   return move
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/^./, (s) => s.toUpperCase())
@@ -435,11 +437,15 @@ function StatBar({ label, value, max = 255 }: { label: string; value: number; ma
 function PokemonModal({
   pokemon,
   allPokemon,
+  movesEs,
+  abilitiesEs,
   onClose,
   onNavigate,
 }: {
   pokemon: Pokemon;
   allPokemon: Pokemon[];
+  movesEs: Record<string, string>;
+  abilitiesEs: Record<string, string>;
   onClose: () => void;
   onNavigate: (p: Pokemon) => void;
 }) {
@@ -605,7 +611,7 @@ function PokemonModal({
                     {pokemon.moves.level.map((m, i) => (
                       <div key={i} className="move-item">
                         <span className="move-level">Nv.{m.level}</span>
-                        <span className="move-name">{formatMoveName(m.name)}</span>
+                        <span className="move-name">{formatMoveName(m.name, movesEs)}</span>
                       </div>
                     ))}
                   </div>
@@ -617,7 +623,7 @@ function PokemonModal({
                   <div className="moves-tags">
                     {pokemon.moves.tm.map((m, i) => (
                       <span key={i} className="move-tag">
-                        {formatMoveName(m)}
+                        {formatMoveName(m, movesEs)}
                       </span>
                     ))}
                   </div>
@@ -629,7 +635,7 @@ function PokemonModal({
                   <div className="moves-tags">
                     {pokemon.moves.egg.map((m, i) => (
                       <span key={i} className="move-tag egg">
-                        {formatMoveName(m)}
+                        {formatMoveName(m, movesEs)}
                       </span>
                     ))}
                   </div>
@@ -641,7 +647,7 @@ function PokemonModal({
                   <div className="moves-tags">
                     {pokemon.moves.tutor.map((m, i) => (
                       <span key={i} className="move-tag tutor">
-                        {formatMoveName(m)}
+                        {formatMoveName(m, movesEs)}
                       </span>
                     ))}
                   </div>
@@ -699,7 +705,7 @@ function PokemonModal({
                   <div className="abilities-list">
                     {pokemon.abilities.map((a, i) => (
                       <span key={i} className={`ability-tag ${a.hidden ? 'hidden-ability' : ''}`}>
-                        {formatMoveName(a.name)}
+                        {formatMoveName(a.name, abilitiesEs)}
                         {a.hidden && <small> (oculta)</small>}
                       </span>
                     ))}
@@ -859,6 +865,8 @@ function PokemonModal({
 // ===== Wiki Page =====
 export default function Wiki() {
   const [allPokemon, setAllPokemon] = useState<Pokemon[]>([]);
+  const [movesEs, setMovesEs] = useState<Record<string, string>>({});
+  const [abilitiesEs, setAbilitiesEs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -870,14 +878,19 @@ export default function Wiki() {
 
   // Load data when Wiki page is opened
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}data/pokemon.json`)
-      .then((r) => r.json())
-      .then((data) => {
-        setAllPokemon(data);
+    Promise.all([
+      fetch(`${import.meta.env.BASE_URL}data/pokemon.json`).then((r) => r.json()),
+      fetch(`${import.meta.env.BASE_URL}data/moves-es.json`).then((r) => r.json()),
+      fetch(`${import.meta.env.BASE_URL}data/abilities-es.json`).then((r) => r.json()),
+    ])
+      .then(([pokemonData, movesData, abilitiesData]) => {
+        setAllPokemon(pokemonData);
+        setMovesEs(movesData);
+        setAbilitiesEs(abilitiesData);
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Failed to load pokemon data:', err);
+        console.error('Failed to load data:', err);
         setLoading(false);
       });
   }, []);
@@ -1131,6 +1144,8 @@ export default function Wiki() {
           <PokemonModal
             pokemon={selectedPokemon}
             allPokemon={allPokemon}
+            movesEs={movesEs}
+            abilitiesEs={abilitiesEs}
             onClose={() => setSelectedPokemon(null)}
             onNavigate={(p) => setSelectedPokemon(p)}
           />

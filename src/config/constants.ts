@@ -3,10 +3,10 @@
 // ==========================================
 
 export const SERVER_CONFIG = {
-  name: 'Cobble Quest',
-  ip: 'play.cobblequest.com',
+  name: 'Cobble Quest Network',
+  ip: 'mon.wrquest.xyz',
   version: '1.21.1',
-  discord: 'https://discord.gg/cobblequest',
+  discord: 'https://discord.com/invite/3pqqysGqyf',
   description:
     'El mejor servidor de Cobblemon. Explora, captura y batalla en una experiencia única de Pokémon × Minecraft.',
 };
