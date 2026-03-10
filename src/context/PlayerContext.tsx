@@ -8,6 +8,7 @@ interface PlayerData {
   uuid: string | null;
   avatar: string;
   premium: boolean;
+  whitelisted: boolean;
 }
 
 interface PlayerContextType {
@@ -20,6 +21,8 @@ interface PlayerContextType {
   setPlayer: (username: string, premium: boolean) => Promise<boolean>;
   clearPlayer: () => void;
   requirePlayer: () => boolean;
+  /** Returns true if the player is whitelisted, or opens modal with error */
+  requireWhitelistedPlayer: () => boolean;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -70,6 +73,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         uuid: data.uuid,
         avatar: data.avatar,
         premium: data.premium,
+        whitelisted: data.whitelisted ?? false,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(playerData));
       setPlayerState(playerData);
@@ -95,9 +99,23 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return false;
   }, [player, openModal]);
 
+  /** Returns true if player is set AND whitelisted. Opens modal with message if not. */
+  const requireWhitelistedPlayer = useCallback((): boolean => {
+    if (!player) {
+      openModal();
+      return false;
+    }
+    if (!player.whitelisted) {
+      setError('Debes estar registrado en la whitelist del servidor para comprar. Únete al servidor primero.');
+      setIsModalOpen(true);
+      return false;
+    }
+    return true;
+  }, [player, openModal]);
+
   return (
     <PlayerContext.Provider
-      value={{ player, isModalOpen, isLoading, error, openModal, closeModal, setPlayer, clearPlayer, requirePlayer }}
+      value={{ player, isModalOpen, isLoading, error, openModal, closeModal, setPlayer, clearPlayer, requirePlayer, requireWhitelistedPlayer }}
     >
       {children}
     </PlayerContext.Provider>

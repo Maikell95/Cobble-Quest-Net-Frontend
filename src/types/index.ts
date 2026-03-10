@@ -15,9 +15,17 @@ export interface StoreItem {
 }
 
 export interface CartItem {
-  item: StoreItem;
+  item: StoreItem | RankItem;
   quantity: number;
   type: 'pokemon' | 'rank' | 'item';
+}
+
+export interface RankItem {
+  id: number;
+  name: string;
+  price: number;
+  tebexPackageId?: number;
+  duration: 'monthly' | 'permanent';
 }
 
 export interface ServerStats {
@@ -37,4 +45,35 @@ export interface ServerEvent {
   endDate: string;
   tags: EventTag[];
   active: boolean;
+}
+
+// ---- Tebex ----
+
+export interface TebexPackage {
+  id: number;
+  name: string;
+  description: string;
+  image: string | null;
+  base_price: number;
+  total_price: number;
+  currency: string;
+  category: { id: number; name: string } | null;
+}
+
+export interface TebexBasket {
+  ident: string;
+  complete: boolean;
+  username: string | null;
+  packages: TebexBasketItem[];
+  base_price: number;
+  total_price: number;
+  currency: string;
+  links: { checkout: string };
+}
+
+export interface TebexBasketItem {
+  id: number;
+  quantity: number;
+  package: TebexPackage;
+  price: number;
 }

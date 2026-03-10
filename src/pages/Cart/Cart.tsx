@@ -1,13 +1,75 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Trash2, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, Trash2, ArrowLeft, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/useCart';
 import { usePlayer } from '../../context/usePlayer';
 import { CURRENCY_SYMBOL } from '../../config/constants';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 export default function Cart() {
   const { items, removeItem, clearCart, totalPrice } = useCart();
-  const { requirePlayer } = usePlayer();
+  const { requireWhitelistedPlayer, player } = usePlayer();
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const handleCheckout = async () => {
+    if (!requireWhitelistedPlayer() || !player) return;
+    if (items.length === 0) return;
+
+    setCheckingOut(true);
+    setCheckoutError(null);
+
+    try {
+      // 1. Create basket
+      const basketRes = await fetch(`${API_URL}/api/checkout/basket`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: player.username }),
+      });
+      const basketData = await basketRes.json();
+
+      if (!basketRes.ok || !basketData.success) {
+        setCheckoutError(basketData.message || 'Error al crear el carrito.');
+        return;
+      }
+
+      const basketIdent = basketData.data.ident;
+
+      // 2. Add all items to the basket
+      for (const cartItem of items) {
+        const packageId = cartItem.item.id;
+        const addRes = await fetch(`${API_URL}/api/checkout/basket/${basketIdent}/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packageId, quantity: cartItem.quantity }),
+        });
+        const addData = await addRes.json();
+
+        if (!addRes.ok || !addData.success) {
+          setCheckoutError(addData.message || `Error al agregar "${cartItem.item.name}" al carrito.`);
+          return;
+        }
+      }
+
+      // 3. Redirect to checkout
+      const checkoutRes = await fetch(`${API_URL}/api/checkout/basket/${basketIdent}/checkout`);
+      const checkoutData = await checkoutRes.json();
+
+      if (!checkoutRes.ok || !checkoutData.success) {
+        setCheckoutError(checkoutData.message || 'Error al iniciar el pago.');
+        return;
+      }
+
+      clearCart();
+      window.location.href = checkoutData.data.checkoutUrl;
+    } catch {
+      setCheckoutError('Error de conexión. Inténtalo de nuevo.');
+    } finally {
+      setCheckingOut(false);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -76,11 +138,30 @@ export default function Cart() {
                 </span>
               </div>
               <button
-                className="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white border-none font-bold text-base cursor-pointer transition-all duration-300 mb-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(220,38,38,0.4)]"
-                onClick={() => requirePlayer()}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white border-none font-bold text-base cursor-pointer transition-all duration-300 mb-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(220,38,38,0.4)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                onClick={handleCheckout}
+                disabled={checkingOut}
               >
-                Proceder al Pago
+                {checkingOut ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  'Proceder al Pago'
+                )}
               </button>
+
+              {checkoutError && (
+                <motion.p
+                  className="text-[#ff5252] text-[0.82rem] text-center mt-2 mb-3 p-2.5 rounded-lg bg-[rgba(255,82,82,0.08)]"
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  {checkoutError}
+                </motion.p>
+              )}
+
               <button
                 className="w-full py-2.5 rounded-[10px] bg-transparent border border-[rgba(255,82,82,0.2)] text-[#ff5252] text-[0.88rem] cursor-pointer transition-all hover:bg-[rgba(255,82,82,0.08)]"
                 onClick={clearCart}

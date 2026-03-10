@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Crown, Star, Zap, Gem, Shield, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, Crown, Star, Zap, Gem, Shield, Sparkles, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../config/constants';
 import { usePlayer } from '../../context/usePlayer';
 import './Ranks.css';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 type Duration = 'monthly' | 'permanent';
 
@@ -18,6 +20,8 @@ const RANKS = [
     name: 'Super',
     monthlyPrice: 4.99,
     permanentPrice: 14.99,
+    tebexMonthlyId: 0,    // TODO: poner el Package ID de Tebex para Super mensual
+    tebexPermanentId: 0,   // TODO: poner el Package ID de Tebex para Super permanente
     color: '#55ff55',
     icon: <Star size={28} />,
     description: 'El primer paso en tu aventura. Ventajas básicas para empezar.',
@@ -37,6 +41,8 @@ const RANKS = [
     name: 'Ultra',
     monthlyPrice: 9.99,
     permanentPrice: 29.99,
+    tebexMonthlyId: 0,    // TODO: poner el Package ID de Tebex para Ultra mensual
+    tebexPermanentId: 0,   // TODO: poner el Package ID de Tebex para Ultra permanente
     color: '#aa55ff',
     icon: <Zap size={28} />,
     description: 'Demuestra tu dominio con privilegios de élite en el servidor.',
@@ -56,6 +62,8 @@ const RANKS = [
     name: 'Honor',
     monthlyPrice: 19.99,
     permanentPrice: 44.99,
+    tebexMonthlyId: 0,    // TODO: poner el Package ID de Tebex para Honor mensual
+    tebexPermanentId: 0,   // TODO: poner el Package ID de Tebex para Honor permanente
     color: '#5599ff',
     icon: <Shield size={28} />,
     description: 'Para entrenadores dedicados que buscan más poder y estilo.',
@@ -76,6 +84,8 @@ const RANKS = [
     name: 'Luxury',
     monthlyPrice: 29.99,
     permanentPrice: 59.99,
+    tebexMonthlyId: 0,    // TODO: poner el Package ID de Tebex para Luxury mensual
+    tebexPermanentId: 0,   // TODO: poner el Package ID de Tebex para Luxury permanente
     color: '#F472B6',
     icon: <Gem size={28} />,
     description: 'Lujo total con acceso a contenido premium y eventos VIP.',
@@ -95,6 +105,8 @@ const RANKS = [
     name: 'Master',
     monthlyPrice: 34.99,
     permanentPrice: 74.99,
+    tebexMonthlyId: 0,    // TODO: poner el Package ID de Tebex para Master mensual
+    tebexPermanentId: 0,   // TODO: poner el Package ID de Tebex para Master permanente
     color: '#FFD93D',
     icon: <Crown size={28} />,
     description: 'El rango supremo. Todos los privilegios y máximo prestigio.',
@@ -115,7 +127,9 @@ export default function Ranks() {
   const [duration, setDuration] = useState<Duration>('permanent');
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0);
-  const { requirePlayer } = usePlayer();
+  const [purchasing, setPurchasing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const { requireWhitelistedPlayer, player } = usePlayer();
 
   const activeRank = RANKS[activeIndex];
   const price = duration === 'monthly' ? activeRank.monthlyPrice : activeRank.permanentPrice;
@@ -123,6 +137,66 @@ export default function Ranks() {
   const navigate = (dir: -1 | 1) => {
     setDirection(dir);
     setActiveIndex((prev) => (prev + dir + RANKS.length) % RANKS.length);
+    setPurchaseError(null);
+  };
+
+  const handleBuyRank = async () => {
+    if (!requireWhitelistedPlayer() || !player) return;
+
+    const tebexId = duration === 'monthly' ? activeRank.tebexMonthlyId : activeRank.tebexPermanentId;
+
+    if (!tebexId) {
+      setPurchaseError('Este rango aún no está disponible para comprar.');
+      return;
+    }
+
+    setPurchasing(true);
+    setPurchaseError(null);
+
+    try {
+      // 1. Create basket for the player
+      const basketRes = await fetch(`${API_URL}/api/checkout/basket`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: player.username }),
+      });
+      const basketData = await basketRes.json();
+
+      if (!basketRes.ok || !basketData.success) {
+        setPurchaseError(basketData.message || 'Error al crear el carrito.');
+        return;
+      }
+
+      const basketIdent = basketData.data.ident;
+
+      // 2. Add the rank package to the basket
+      const addRes = await fetch(`${API_URL}/api/checkout/basket/${basketIdent}/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packageId: tebexId }),
+      });
+      const addData = await addRes.json();
+
+      if (!addRes.ok || !addData.success) {
+        setPurchaseError(addData.message || 'Error al agregar el rango al carrito.');
+        return;
+      }
+
+      // 3. Get checkout URL and redirect
+      const checkoutRes = await fetch(`${API_URL}/api/checkout/basket/${basketIdent}/checkout`);
+      const checkoutData = await checkoutRes.json();
+
+      if (!checkoutRes.ok || !checkoutData.success) {
+        setPurchaseError(checkoutData.message || 'Error al iniciar el pago.');
+        return;
+      }
+
+      window.location.href = checkoutData.data.checkoutUrl;
+    } catch {
+      setPurchaseError('Error de conexión. Inténtalo de nuevo.');
+    } finally {
+      setPurchasing(false);
+    }
   };
 
   return (
@@ -174,9 +248,9 @@ export default function Ranks() {
               key={activeIndex}
               className="carousel-ring"
               custom={direction}
-              initial={(d: number) => ({ x: d * 100, opacity: 0 })}
+              initial={{ x: direction * 100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={(d: number) => ({ x: d * -100, opacity: 0 })}
+              exit={{ x: direction * -100, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
             >
               {[-1, 0, 1].map((offset) => {
@@ -271,10 +345,28 @@ export default function Ranks() {
                 background: `linear-gradient(135deg, ${activeRank.color}, ${activeRank.color}cc)`,
                 color: '#000',
               }}
-              onClick={() => requirePlayer()}
+              onClick={handleBuyRank}
+              disabled={purchasing}
             >
-              Comprar {activeRank.name}
+              {purchasing ? (
+                <>
+                  <Loader2 size={18} className="animate-spin inline mr-2" />
+                  Procesando...
+                </>
+              ) : (
+                `Comprar ${activeRank.name}`
+              )}
             </button>
+
+            {purchaseError && (
+              <motion.p
+                className="text-[#ff5252] text-[0.85rem] text-center mt-3 p-3 rounded-lg bg-[rgba(255,82,82,0.08)]"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                {purchaseError}
+              </motion.p>
+            )}
           </motion.div>
         </AnimatePresence>
 
