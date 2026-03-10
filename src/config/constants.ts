@@ -3,7 +3,7 @@
 // ==========================================
 
 export const SERVER_CONFIG = {
-  name: 'Cobble Quest Network',
+  name: 'Cobble Quest',
   ip: 'mon.wrquest.xyz',
   version: '1.21.1',
   discord: 'https://discord.com/invite/3pqqysGqyf',

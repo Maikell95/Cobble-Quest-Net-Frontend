@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { NAV_LINKS, SERVER_CONFIG } from '../../config/constants';
 import { useCart } from '../../context/CartContext';
@@ -22,6 +23,29 @@ export default function Navbar() {
   const { totalItems } = useCart();
   const { theme, toggleTheme } = useTheme();
   const serverStats = useServerStatus();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  // Close on click outside
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [isOpen]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-[1000] bg-[var(--navbar-bg)] backdrop-blur-[20px] border-b border-[var(--border-theme)] transition-colors duration-300 pt-[env(safe-area-inset-top)]">
@@ -98,23 +122,51 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      <div className={`${isOpen ? 'flex' : 'hidden'} flex-col px-6 pb-5 pt-2 gap-0.5 bg-[var(--navbar-bg)] border-b border-[var(--border-theme)]`}>
-        {NAV_LINKS.map((link) => (
-          <Link
-            key={link.path}
-            to={link.path}
-            className={`no-underline text-base px-4 py-3.5 rounded-xl transition-all duration-200 active:scale-[0.98] ${
-              location.pathname === link.path
-                ? 'text-primary bg-primary/10 font-semibold'
-                : 'text-[var(--text-secondary)] active:bg-[var(--bg-surface-hover)]'
-            }`}
-            onClick={() => setIsOpen(false)}
-          >
-            {link.label}
-          </Link>
-        ))}
-      </div>
+      {/* Mobile Menu Overlay + Dropdown */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 top-[60px] bg-black/40 z-[-1] md:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
+            {/* Menu */}
+            <motion.div
+              ref={menuRef}
+              className="flex flex-col px-6 pb-5 pt-2 gap-0.5 bg-[var(--navbar-bg)] border-b border-[var(--border-theme)] md:hidden"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              {NAV_LINKS.map((link, i) => (
+                <motion.div
+                  key={link.path}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2, delay: i * 0.04 }}
+                >
+                  <Link
+                    to={link.path}
+                    className={`block no-underline text-base px-4 py-3.5 rounded-xl transition-all duration-200 active:scale-[0.98] ${
+                      location.pathname === link.path
+                        ? 'text-primary bg-primary/10 font-semibold'
+                        : 'text-[var(--text-secondary)] active:bg-[var(--bg-surface-hover)]'
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

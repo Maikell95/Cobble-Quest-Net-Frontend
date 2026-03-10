@@ -16,7 +16,7 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col">
       <ScrollToTop />
       <Navbar />
-      <main className="flex-1 pt-[70px]">
+      <main className="flex-1 pt-[70px] max-md:pt-[60px]">
         <Outlet />
       </main>
       <Footer />

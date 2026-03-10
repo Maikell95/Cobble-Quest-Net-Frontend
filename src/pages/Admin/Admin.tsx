@@ -14,8 +14,15 @@ import {
   FileText,
   Layers,
   ChevronDown,
+  LogOut,
+  Lock,
+  User,
+  Eye,
+  EyeOff,
+  Loader2,
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../config/constants';
+import { useAuth } from '../../context/AuthContext';
 import type { StoreItem, StoreCategory, ServerEvent, EventTag } from '../../types';
 
 // ===== Constants =====
@@ -36,6 +43,123 @@ const EVENT_TAGS: { id: EventTag; label: string; color: string }[] = [
 ];
 
 type Tab = 'store' | 'events';
+
+// ===== Login Screen =====
+function LoginScreen() {
+  const { login } = useAuth();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username.trim() || !password.trim()) return;
+
+    setLoading(true);
+    setError(null);
+    const err = await login(username, password);
+    setLoading(false);
+    if (err) setError(err);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <motion.div
+        className="w-full max-w-[400px]"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* Lock icon */}
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-[0_8px_30px_rgba(220,38,38,0.3)]">
+            <Lock size={28} className="text-white" />
+          </div>
+        </div>
+
+        <h1 className="font-display text-[1.75rem] font-extrabold text-[var(--text-primary)] text-center mb-1">
+          Panel Admin
+        </h1>
+        <p className="text-[var(--text-muted)] text-[0.92rem] text-center mb-8">
+          Ingresa tus credenciales para acceder
+        </p>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Username */}
+          <div>
+            <label className="flex items-center gap-1.5 text-[0.82rem] font-semibold text-[var(--text-secondary)] mb-2">
+              <User size={13} /> Usuario
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Nombre de usuario"
+              autoComplete="username"
+              className="w-full px-4 py-3 bg-[var(--bg-surface)] border border-[var(--border-theme)] rounded-xl text-[var(--text-primary)] text-[0.9rem] outline-none transition-colors focus:border-primary/50 placeholder:text-[var(--text-muted)]"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="flex items-center gap-1.5 text-[0.82rem] font-semibold text-[var(--text-secondary)] mb-2">
+              <Lock size={13} /> Contraseña
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Contraseña"
+                autoComplete="current-password"
+                className="w-full px-4 py-3 pr-11 bg-[var(--bg-surface)] border border-[var(--border-theme)] rounded-xl text-[var(--text-primary)] text-[0.9rem] outline-none transition-colors focus:border-primary/50 placeholder:text-[var(--text-muted)]"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Error message */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                className="px-4 py-3 rounded-xl bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] text-[#ef4444] text-[0.85rem] font-medium"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading || !username.trim() || !password.trim()}
+            className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white font-semibold text-[0.92rem] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(220,38,38,0.3)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none mt-2"
+          >
+            {loading ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <>
+                <Lock size={16} /> Iniciar Sesión
+              </>
+            )}
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  );
+}
 
 // ===== Empty defaults =====
 const emptyStoreItem: Omit<StoreItem, 'id'> = {
@@ -59,6 +183,7 @@ const emptyEvent: Omit<ServerEvent, 'id'> = {
 
 // ===== Main Admin Component =====
 export default function Admin() {
+  const { isAuthenticated, isLoading, username, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('store');
 
   // Store state
@@ -98,6 +223,19 @@ export default function Admin() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [showCategoryDropdown]);
+
+  // Auth gate
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
 
   // ---- Store handlers ----
   const openNewItem = () => {
@@ -181,9 +319,15 @@ export default function Admin() {
             <h1 className="font-display text-[2.5rem] font-extrabold text-[var(--text-primary)] mb-2 max-sm:text-[1.75rem]">
               Panel Admin
             </h1>
-            <p className="text-[var(--text-muted)] text-[1.05rem]">
+            <p className="text-[var(--text-muted)] text-[1.05rem] mb-4">
               Gestiona la tienda y los eventos del servidor
             </p>
+            <button
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-theme)] text-[var(--text-secondary)] text-[0.85rem] font-medium cursor-pointer transition-all hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
+              onClick={logout}
+            >
+              <LogOut size={15} /> {username}
+            </button>
           </motion.div>
         </div>
       </section>

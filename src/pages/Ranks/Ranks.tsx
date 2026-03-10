@@ -112,12 +112,14 @@ const RANKS = [
 
 export default function Ranks() {
   const [duration, setDuration] = useState<Duration>('permanent');
-  const [activeIndex, setActiveIndex] = useState(2); // Honor (popular) as default
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
 
   const activeRank = RANKS[activeIndex];
   const price = duration === 'monthly' ? activeRank.monthlyPrice : activeRank.permanentPrice;
 
   const navigate = (dir: -1 | 1) => {
+    setDirection(dir);
     setActiveIndex((prev) => (prev + dir + RANKS.length) % RANKS.length);
   };
 
@@ -165,33 +167,49 @@ export default function Ranks() {
             <ChevronLeft size={24} />
           </button>
 
-          <div className="carousel-ring">
-            {RANKS.map((rank, index) => {
-              const offset = ((index - activeIndex + RANKS.length + 2) % RANKS.length) - 2;
-              const isActive = index === activeIndex;
-              const absOff = Math.abs(offset);
-              return (
-                <motion.button
-                  key={rank.id}
-                  className={`carousel-node ${isActive ? 'active' : ''}`}
-                  style={{ '--node-color': rank.color } as React.CSSProperties}
-                  animate={{
-                    opacity: isActive ? 1 : 1 - absOff * 0.25,
-                    scale: isActive ? 1.15 : 1 - absOff * 0.1,
-                  }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                  onClick={() => setActiveIndex(index)}
-                  aria-label={rank.name}
-                >
-                  <div className="carousel-node-icon">{rank.icon}</div>
-                  <span className="carousel-node-name">{rank.name}</span>
-                  {rank.popular && !isActive && (
-                    <span className="carousel-popular-dot"><Sparkles size={10} /></span>
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
+          <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+            <motion.div
+              key={activeIndex}
+              className="carousel-ring"
+              custom={direction}
+              initial={(d: number) => ({ x: d * 100, opacity: 0 })}
+              animate={{ x: 0, opacity: 1 }}
+              exit={(d: number) => ({ x: d * -100, opacity: 0 })}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              {[-1, 0, 1].map((offset) => {
+                const rankIndex = (activeIndex + offset + RANKS.length) % RANKS.length;
+                const rank = RANKS[rankIndex];
+                const isActive = offset === 0;
+                return (
+                  <motion.button
+                    key={`slot-${offset}`}
+                    className={`carousel-node ${isActive ? 'active' : ''}`}
+                    style={{ '--node-color': rank.color } as React.CSSProperties}
+                    initial={false}
+                    animate={{
+                      opacity: isActive ? 1 : 0.55,
+                      scale: isActive ? 1.12 : 0.88,
+                    }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    onClick={() => {
+                      if (offset !== 0) {
+                        setDirection(offset as -1 | 1);
+                        setActiveIndex(rankIndex);
+                      }
+                    }}
+                    aria-label={rank.name}
+                  >
+                    <div className="carousel-node-icon">{rank.icon}</div>
+                    <span className="carousel-node-name">{rank.name}</span>
+                    {rank.popular && !isActive && (
+                      <span className="carousel-popular-dot"><Sparkles size={10} /></span>
+                    )}
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          </AnimatePresence>
 
           <button className="carousel-arrow carousel-arrow-right" onClick={() => navigate(1)} aria-label="Siguiente">
             <ChevronRight size={24} />
@@ -204,10 +222,10 @@ export default function Ranks() {
             key={activeRank.id}
             className="rank-detail"
             style={{ '--rank-color': activeRank.color } as React.CSSProperties}
-            initial={{ opacity: 0, y: 24, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
           >
             {activeRank.popular && (
               <div className="rank-detail-popular">
@@ -235,9 +253,9 @@ export default function Ranks() {
                 <motion.div
                   key={feature.text}
                   className={`rank-detail-feature${feature.wide ? ' rank-feature-wide' : ''}`}
-                  initial={{ opacity: 0, x: -10 }}
+                  initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 25, delay: i * 0.03 }}
+                  transition={{ duration: 0.25, ease: 'easeOut', delay: i * 0.025 }}
                 >
                   <Check size={16} style={{ color: activeRank.color }} className="shrink-0" />
                   <span>{feature.text}</span>
