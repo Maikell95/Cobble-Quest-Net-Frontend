@@ -22,7 +22,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../config/constants';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import type { StoreItem, StoreCategory, ServerEvent, EventTag } from '../../types';
 
 // ===== Constants =====

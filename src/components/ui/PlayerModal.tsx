@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, Loader2, AlertCircle, Shield, ShieldOff } from 'lucide-react';
-import { usePlayer } from '../../context/PlayerContext';
+import { usePlayer } from '../../context/usePlayer';
 
 export default function PlayerModal() {
   const { isModalOpen, closeModal, setPlayer, isLoading, error } = usePlayer();

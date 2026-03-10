@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Crown, Star, Zap, Gem, Shield, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../config/constants';
-import { usePlayer } from '../../context/PlayerContext';
+import { usePlayer } from '../../context/usePlayer';
 import './Ranks.css';
 
 type Duration = 'monthly' | 'permanent';

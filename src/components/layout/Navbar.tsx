@@ -3,9 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { NAV_LINKS, SERVER_CONFIG } from '../../config/constants';
-import { useCart } from '../../context/CartContext';
-import { useTheme } from '../../context/ThemeContext';
-import { usePlayer } from '../../context/PlayerContext';
+import { useCart } from '../../context/useCart';
+import { useTheme } from '../../context/useTheme';
+import { usePlayer } from '../../context/usePlayer';
 import { useServerStatus } from '../../hooks/useServerStatus';
 import PeekPokemon from '../ui/PeekPokemon';
 

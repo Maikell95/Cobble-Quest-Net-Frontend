@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { ShoppingCart, Trash2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
-import { usePlayer } from '../../context/PlayerContext';
+import { useCart } from '../../context/useCart';
+import { usePlayer } from '../../context/usePlayer';
 import { CURRENCY_SYMBOL } from '../../config/constants';
 
 export default function Cart() {
