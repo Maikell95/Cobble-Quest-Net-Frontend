@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { NAV_LINKS, SERVER_CONFIG } from '../../config/constants';
 import { useCart } from '../../context/CartContext';
 import { useTheme } from '../../context/ThemeContext';
+import { usePlayer } from '../../context/PlayerContext';
 import { useServerStatus } from '../../hooks/useServerStatus';
 import PeekPokemon from '../ui/PeekPokemon';
 
@@ -22,6 +23,7 @@ export default function Navbar() {
   const location = useLocation();
   const { totalItems } = useCart();
   const { theme, toggleTheme } = useTheme();
+  const { player, openModal } = usePlayer();
   const serverStats = useServerStatus();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +54,7 @@ export default function Navbar() {
       <div className="max-w-[1280px] mx-auto px-6 h-[70px] flex items-center justify-between max-md:px-4 max-md:h-[60px]">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 no-underline text-[var(--text-primary)] hover:opacity-85 transition-opacity">
-          <img src={`${B}images/cobblequest.svg`} alt="Cobble Quest Network" className="w-9 h-9 rounded-lg object-contain" />
+          <img src={`${B}images/cobblequest.svg`} alt="Cobble Quest" className="w-9 h-9 rounded-lg object-contain" />
           <span className="font-display text-[1.4rem] font-bold text-[var(--text-primary)] max-[480px]:text-[1.15rem]">{SERVER_CONFIG.name}</span>
         </Link>
 
@@ -91,6 +93,26 @@ export default function Navbar() {
                 : `${serverStats.playersOnline}/${serverStats.maxPlayers}`}
             </span>
           </div>
+
+          {/* Player */}
+          {player ? (
+            <button
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-[var(--bg-surface)] border border-[var(--border-theme)] cursor-pointer transition-all hover:border-primary/40 hover:bg-[var(--bg-surface-hover)] max-[480px]:px-1.5"
+              onClick={openModal}
+              title="Cambiar jugador"
+            >
+              <img src={player.avatar} alt={player.username} className="w-5 h-5 rounded" />
+              <span className="text-[var(--text-primary)] text-[0.82rem] font-medium max-md:hidden">{player.username}</span>
+            </button>
+          ) : (
+            <button
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[0.82rem] font-medium cursor-pointer transition-all hover:bg-primary/15 hover:border-primary/30"
+              onClick={openModal}
+            >
+              <User size={14} />
+              <span className="max-md:hidden">Iniciar</span>
+            </button>
+          )}
 
           {/* Theme Toggle */}
           <button

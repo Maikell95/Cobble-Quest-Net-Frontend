@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Crown, Star, Zap, Gem, Shield, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../config/constants';
+import { usePlayer } from '../../context/PlayerContext';
 import './Ranks.css';
 
 type Duration = 'monthly' | 'permanent';
@@ -114,6 +115,7 @@ export default function Ranks() {
   const [duration, setDuration] = useState<Duration>('permanent');
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const { requirePlayer } = usePlayer();
 
   const activeRank = RANKS[activeIndex];
   const price = duration === 'monthly' ? activeRank.monthlyPrice : activeRank.permanentPrice;
@@ -269,6 +271,7 @@ export default function Ranks() {
                 background: `linear-gradient(135deg, ${activeRank.color}, ${activeRank.color}cc)`,
                 color: '#000',
               }}
+              onClick={() => requirePlayer()}
             >
               Comprar {activeRank.name}
             </button>

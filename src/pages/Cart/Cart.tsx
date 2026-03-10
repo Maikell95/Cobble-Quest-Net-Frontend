@@ -2,10 +2,12 @@ import { motion } from 'framer-motion';
 import { ShoppingCart, Trash2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { usePlayer } from '../../context/PlayerContext';
 import { CURRENCY_SYMBOL } from '../../config/constants';
 
 export default function Cart() {
   const { items, removeItem, clearCart, totalPrice } = useCart();
+  const { requirePlayer } = usePlayer();
 
   return (
     <div className="min-h-screen">
@@ -73,7 +75,10 @@ export default function Cart() {
                   {totalPrice.toFixed(2)}
                 </span>
               </div>
-              <button className="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white border-none font-bold text-base cursor-pointer transition-all duration-300 mb-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(220,38,38,0.4)]">
+              <button
+                className="w-full py-3.5 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white border-none font-bold text-base cursor-pointer transition-all duration-300 mb-3 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(220,38,38,0.4)]"
+                onClick={() => requirePlayer()}
+              >
                 Proceder al Pago
               </button>
               <button
