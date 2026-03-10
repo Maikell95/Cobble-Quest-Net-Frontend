@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useState, useCallback, type ReactNode } from 'react';
 
 const STORAGE_KEY = 'cbq_player';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -23,6 +23,8 @@ interface PlayerContextType {
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
+
+export { PlayerContext };
 
 function loadPlayer(): PlayerData | null {
   try {
@@ -100,10 +102,4 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       {children}
     </PlayerContext.Provider>
   );
-}
-
-export function usePlayer() {
-  const ctx = useContext(PlayerContext);
-  if (!ctx) throw new Error('usePlayer must be used within PlayerProvider');
-  return ctx;
 }
