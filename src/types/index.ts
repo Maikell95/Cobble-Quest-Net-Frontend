@@ -5,13 +5,16 @@
 export type StoreCategory = 'keys' | 'breeding' | 'battlepass' | 'extras';
 
 export interface StoreItem {
-  id: number;
+  id: string;
   name: string;
   image: string;
   price: number;
   category: StoreCategory;
   description: string;
   discount?: number;
+  /** Server commands to execute on purchase. Use {username} placeholder. */
+  commands?: string[];
+  active?: boolean;
 }
 
 export interface CartItem {
@@ -24,8 +27,9 @@ export interface RankItem {
   id: number;
   name: string;
   price: number;
-  tebexPackageId?: number;
   duration: 'monthly' | 'permanent';
+  /** Server commands to execute on purchase */
+  commands?: string[];
 }
 
 export interface ServerStats {
@@ -37,7 +41,7 @@ export interface ServerStats {
 export type EventTag = 'pvp' | 'capture' | 'exploration' | 'tournament' | 'seasonal' | 'special';
 
 export interface ServerEvent {
-  id: number;
+  id: string;
   title: string;
   description: string;
   image: string;
@@ -47,33 +51,37 @@ export interface ServerEvent {
   active: boolean;
 }
 
-// ---- Tebex ----
+// ---- Payments ----
 
-export interface TebexPackage {
-  id: number;
+export type PaymentMethod = 'paypal' | 'stripe';
+
+export interface AvailablePaymentMethod {
+  id: PaymentMethod;
   name: string;
-  description: string;
-  image: string | null;
-  base_price: number;
-  total_price: number;
-  currency: string;
-  category: { id: number; name: string } | null;
+  available: boolean;
 }
 
-export interface TebexBasket {
-  ident: string;
-  complete: boolean;
-  username: string | null;
-  packages: TebexBasketItem[];
-  base_price: number;
-  total_price: number;
-  currency: string;
-  links: { checkout: string };
-}
-
-export interface TebexBasketItem {
-  id: number;
-  quantity: number;
-  package: TebexPackage;
+export interface PaymentItem {
+  name: string;
+  description?: string;
   price: number;
+  quantity: number;
+  /** Server commands to execute when this item is purchased */
+  commands?: string[];
+  /** Store item ID for server-side price verification */
+  storeItemId?: string;
+}
+
+export interface CreateOrderResponse {
+  orderId: string;
+  approvalUrl: string;
+  method: PaymentMethod;
+}
+
+export interface CaptureOrderResponse {
+  status: 'completed' | 'pending' | 'failed';
+  orderId: string;
+  payer?: { email?: string; name?: string };
+  amount: number;
+  currency: string;
 }

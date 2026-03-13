@@ -8,7 +8,7 @@ interface PlayerData {
   uuid: string | null;
   avatar: string;
   premium: boolean;
-  whitelisted: boolean;
+  online: boolean;
 }
 
 interface PlayerContextType {
@@ -21,8 +21,8 @@ interface PlayerContextType {
   setPlayer: (username: string, premium: boolean) => Promise<boolean>;
   clearPlayer: () => void;
   requirePlayer: () => boolean;
-  /** Returns true if the player is whitelisted, or opens modal with error */
-  requireWhitelistedPlayer: () => boolean;
+  /** Ensures a player is selected. Opens modal if not. Returns true if player exists. */
+  requireWhitelistedPlayer: () => Promise<boolean>;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -32,7 +32,19 @@ export { PlayerContext };
 function loadPlayer(): PlayerData | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<PlayerData>;
+    if (!parsed.username || !parsed.avatar || typeof parsed.premium !== 'boolean') {
+      return null;
+    }
+
+    return {
+      username: parsed.username,
+      uuid: parsed.uuid ?? null,
+      avatar: parsed.avatar,
+      premium: parsed.premium,
+      online: parsed.online ?? false,
+    };
   } catch {
     return null;
   }
@@ -73,10 +85,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         uuid: data.uuid,
         avatar: data.avatar,
         premium: data.premium,
-        whitelisted: data.whitelisted ?? false,
+        online: data.online ?? false,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(playerData));
       setPlayerState(playerData);
+
       setIsModalOpen(false);
       return true;
     } catch {
@@ -99,15 +112,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return false;
   }, [player, openModal]);
 
-  /** Returns true if player is set AND whitelisted. Opens modal with message if not. */
-  const requireWhitelistedPlayer = useCallback((): boolean => {
+  /** Ensures a player is selected before proceeding (store/cart/ranks). */
+  const requireWhitelistedPlayer = useCallback(async (): Promise<boolean> => {
     if (!player) {
       openModal();
-      return false;
-    }
-    if (!player.whitelisted) {
-      setError('Debes estar registrado en la whitelist del servidor para comprar. Únete al servidor primero.');
-      setIsModalOpen(true);
       return false;
     }
     return true;

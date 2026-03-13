@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag,
@@ -20,10 +20,14 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  Terminal,
+  AlertCircle,
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../config/constants';
 import { useAuth } from '../../context/useAuth';
 import type { StoreItem, StoreCategory, ServerEvent, EventTag } from '../../types';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 // ===== Constants =====
 const STORE_CATEGORIES: { id: StoreCategory; label: string }[] = [
@@ -169,6 +173,8 @@ const emptyStoreItem: Omit<StoreItem, 'id'> = {
   category: 'keys',
   description: '',
   discount: undefined,
+  commands: [],
+  active: true,
 };
 
 const emptyEvent: Omit<ServerEvent, 'id'> = {
@@ -183,7 +189,7 @@ const emptyEvent: Omit<ServerEvent, 'id'> = {
 
 // ===== Main Admin Component =====
 export default function Admin() {
-  const { isAuthenticated, isLoading, username, logout } = useAuth();
+  const { isAuthenticated, isLoading, username, logout, token } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('store');
 
   // Store state
@@ -191,6 +197,7 @@ export default function Admin() {
   const [editingItem, setEditingItem] = useState<StoreItem | null>(null);
   const [showItemForm, setShowItemForm] = useState(false);
   const [itemDraft, setItemDraft] = useState(emptyStoreItem);
+  const [commandsText, setCommandsText] = useState('');
 
   // Events state
   const [events, setEvents] = useState<ServerEvent[]>([]);
@@ -198,9 +205,43 @@ export default function Admin() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [eventDraft, setEventDraft] = useState(emptyEvent);
 
+  // API loading states
+  const [fetchingStore, setFetchingStore] = useState(false);
+  const [fetchingEvents, setFetchingEvents] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+
   // Category dropdown state
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const categoryRef = useRef<HTMLDivElement>(null);
+
+  // Helper: auth headers
+  const authHeaders = useCallback(
+    () => ({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    }),
+    [token],
+  );
+
+  // ---- Fetch data on mount ----
+  useEffect(() => {
+    if (!token) return;
+
+    setFetchingStore(true);
+    fetch(`${API_URL}/api/store/admin/all`, { headers: authHeaders() })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r)))
+      .then((d) => setStoreItems(d.data ?? []))
+      .catch(() => setApiError('Error al cargar artículos'))
+      .finally(() => setFetchingStore(false));
+
+    setFetchingEvents(true);
+    fetch(`${API_URL}/api/events/admin/all`, { headers: authHeaders() })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r)))
+      .then((d) => setEvents(d.data ?? []))
+      .catch(() => setApiError('Error al cargar eventos'))
+      .finally(() => setFetchingEvents(false));
+  }, [token, authHeaders]);
 
   // Lock body scroll when any modal is open
   useEffect(() => {
@@ -241,31 +282,88 @@ export default function Admin() {
   const openNewItem = () => {
     setEditingItem(null);
     setItemDraft(emptyStoreItem);
+    setCommandsText('');
     setShowItemForm(true);
+    setApiError(null);
   };
 
   const openEditItem = (item: StoreItem) => {
     setEditingItem(item);
     setItemDraft({ ...item });
+    setCommandsText((item.commands ?? []).join('\n'));
     setShowItemForm(true);
+    setApiError(null);
   };
 
-  const saveItem = () => {
-    if (!itemDraft.name.trim()) return;
-    if (editingItem) {
-      setStoreItems((prev) =>
-        prev.map((i) => (i.id === editingItem.id ? { ...itemDraft, id: editingItem.id } : i)),
-      );
-    } else {
-      const newId = storeItems.length > 0 ? Math.max(...storeItems.map((i) => i.id)) + 1 : 1;
-      setStoreItems((prev) => [...prev, { ...itemDraft, id: newId }]);
+  const saveItem = async () => {
+    if (!itemDraft.name.trim() || saving) return;
+    setSaving(true);
+    setApiError(null);
+
+    const commands = commandsText
+      .split('\n')
+      .map((c) => c.trim())
+      .filter(Boolean);
+
+    const payload = {
+      name: itemDraft.name,
+      description: itemDraft.description,
+      image: itemDraft.image,
+      category: itemDraft.category,
+      price: itemDraft.price,
+      discount: itemDraft.discount ?? null,
+      commands,
+      active: itemDraft.active ?? true,
+    };
+
+    try {
+      if (editingItem) {
+        const res = await fetch(`${API_URL}/api/store/${editingItem.id}`, {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Error al guardar');
+        setStoreItems((prev) => prev.map((i) => (i.id === editingItem.id ? data.data : i)));
+      } else {
+        const res = await fetch(`${API_URL}/api/store`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Error al crear');
+        setStoreItems((prev) => [...prev, data.data]);
+      }
+      setShowItemForm(false);
+      setEditingItem(null);
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Error al guardar artículo');
+    } finally {
+      setSaving(false);
     }
-    setShowItemForm(false);
-    setEditingItem(null);
   };
 
-  const deleteItem = (id: number) => {
-    setStoreItems((prev) => prev.filter((i) => i.id !== id));
+  const deleteItem = async (id: string) => {
+    if (saving) return;
+    setSaving(true);
+    setApiError(null);
+    try {
+      const res = await fetch(`${API_URL}/api/store/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || 'Error al eliminar');
+      }
+      setStoreItems((prev) => prev.filter((i) => i.id !== id));
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Error al eliminar artículo');
+    } finally {
+      setSaving(false);
+    }
   };
 
   // ---- Event handlers ----
@@ -273,30 +371,79 @@ export default function Admin() {
     setEditingEvent(null);
     setEventDraft(emptyEvent);
     setShowEventForm(true);
+    setApiError(null);
   };
 
   const openEditEvent = (event: ServerEvent) => {
     setEditingEvent(event);
     setEventDraft({ ...event });
     setShowEventForm(true);
+    setApiError(null);
   };
 
-  const saveEvent = () => {
-    if (!eventDraft.title.trim()) return;
-    if (editingEvent) {
-      setEvents((prev) =>
-        prev.map((e) => (e.id === editingEvent.id ? { ...eventDraft, id: editingEvent.id } : e)),
-      );
-    } else {
-      const newId = events.length > 0 ? Math.max(...events.map((e) => e.id)) + 1 : 1;
-      setEvents((prev) => [...prev, { ...eventDraft, id: newId }]);
+  const saveEvent = async () => {
+    if (!eventDraft.title.trim() || saving) return;
+    setSaving(true);
+    setApiError(null);
+
+    const payload = {
+      title: eventDraft.title,
+      description: eventDraft.description,
+      image: eventDraft.image,
+      startDate: eventDraft.startDate,
+      endDate: eventDraft.endDate,
+      tags: eventDraft.tags,
+      active: eventDraft.active,
+    };
+
+    try {
+      if (editingEvent) {
+        const res = await fetch(`${API_URL}/api/events/${editingEvent.id}`, {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Error al guardar');
+        setEvents((prev) => prev.map((e) => (e.id === editingEvent.id ? data.data : e)));
+      } else {
+        const res = await fetch(`${API_URL}/api/events`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Error al crear');
+        setEvents((prev) => [...prev, data.data]);
+      }
+      setShowEventForm(false);
+      setEditingEvent(null);
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Error al guardar evento');
+    } finally {
+      setSaving(false);
     }
-    setShowEventForm(false);
-    setEditingEvent(null);
   };
 
-  const deleteEvent = (id: number) => {
-    setEvents((prev) => prev.filter((e) => e.id !== id));
+  const deleteEvent = async (id: string) => {
+    if (saving) return;
+    setSaving(true);
+    setApiError(null);
+    try {
+      const res = await fetch(`${API_URL}/api/events/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || 'Error al eliminar');
+      }
+      setEvents((prev) => prev.filter((e) => e.id !== id));
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Error al eliminar evento');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggleEventTag = (tag: EventTag) => {
@@ -357,6 +504,24 @@ export default function Admin() {
           </button>
         </div>
 
+        {/* API Error Banner */}
+        <AnimatePresence>
+          {apiError && (
+            <motion.div
+              className="flex items-center gap-3 mb-6 px-4 py-3 rounded-xl bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] text-[#ef4444] text-[0.85rem] font-medium"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+            >
+              <AlertCircle size={16} className="shrink-0" />
+              <span className="flex-1">{apiError}</span>
+              <button className="shrink-0 p-1 hover:bg-[rgba(239,68,68,0.15)] rounded-lg transition-colors" onClick={() => setApiError(null)}>
+                <X size={14} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* ===== STORE TAB ===== */}
         {activeTab === 'store' && (
           <motion.div
@@ -378,7 +543,11 @@ export default function Admin() {
             </div>
 
             {/* Items List */}
-            {storeItems.length === 0 ? (
+            {fetchingStore ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 size={28} className="animate-spin text-primary" />
+              </div>
+            ) : storeItems.length === 0 ? (
               <div className="text-center py-16 px-4 rounded-2xl border border-dashed border-[var(--border-theme)] bg-[var(--bg-surface)]">
                 <ShoppingBag size={48} className="mx-auto mb-4 text-[var(--text-muted)] opacity-40" />
                 <h3 className="text-[var(--text-secondary)] text-[1.1rem] font-semibold mb-2">
@@ -420,6 +589,15 @@ export default function Admin() {
                         </h3>
                         <span className="text-[0.7rem] font-semibold px-2 py-0.5 rounded-md bg-primary/10 text-primary capitalize">
                           {STORE_CATEGORIES.find((c) => c.id === item.category)?.label || item.category}
+                        </span>
+                        <span
+                          className={`text-[0.7rem] font-bold px-2 py-0.5 rounded-full ${
+                            item.active !== false
+                              ? 'bg-[rgba(34,197,94,0.12)] text-[#22c55e]'
+                              : 'bg-[var(--bg-surface)] text-[var(--text-muted)]'
+                          }`}
+                        >
+                          {item.active !== false ? 'Activo' : 'Inactivo'}
                         </span>
                       </div>
                       <p className="text-[var(--text-muted)] text-[0.82rem] truncate">{item.description}</p>
@@ -478,7 +656,11 @@ export default function Admin() {
             </div>
 
             {/* Events List */}
-            {events.length === 0 ? (
+            {fetchingEvents ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 size={28} className="animate-spin text-primary" />
+              </div>
+            ) : events.length === 0 ? (
               <div className="text-center py-16 px-4 rounded-2xl border border-dashed border-[var(--border-theme)] bg-[var(--bg-surface)]">
                 <CalendarDays size={48} className="mx-auto mb-4 text-[var(--text-muted)] opacity-40" />
                 <h3 className="text-[var(--text-secondary)] text-[1.1rem] font-semibold mb-2">
@@ -744,6 +926,48 @@ export default function Admin() {
                     />
                   </div>
                 </div>
+
+                {/* Commands */}
+                <div>
+                  <label className="flex items-center gap-1.5 text-[0.82rem] font-semibold text-[var(--text-secondary)] mb-2">
+                    <Terminal size={13} /> Comandos (uno por línea)
+                  </label>
+                  <textarea
+                    value={commandsText}
+                    onChange={(e) => setCommandsText(e.target.value)}
+                    placeholder={'lp user {username} parent set vip\ngive {username} diamond 1'}
+                    rows={3}
+                    className="w-full px-4 py-2.5 bg-[var(--bg-surface)] border border-[var(--border-theme)] rounded-xl text-[var(--text-primary)] text-[0.9rem] outline-none transition-colors focus:border-primary/50 resize-none placeholder:text-[var(--text-muted)] font-mono"
+                  />
+                  <p className="text-[var(--text-muted)] text-[0.75rem] mt-1">
+                    Usa <code className="bg-[var(--bg-surface)] px-1 py-0.5 rounded text-[0.72rem]">{'{username}'}</code> como placeholder del jugador. Máx 20 comandos.
+                  </p>
+                </div>
+
+                {/* Active Toggle */}
+                <div className="flex items-center justify-between p-4 bg-[var(--bg-surface)] border border-[var(--border-theme)] rounded-xl">
+                  <div>
+                    <p className="text-[var(--text-primary)] text-[0.9rem] font-semibold">
+                      Artículo Activo
+                    </p>
+                    <p className="text-[var(--text-muted)] text-[0.78rem]">
+                      Los artículos activos se muestran en la tienda pública
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className={`relative w-11 h-6 rounded-full cursor-pointer transition-colors duration-300 ${
+                      itemDraft.active !== false ? 'bg-[#22c55e]' : 'bg-[var(--bg-surface-hover)]'
+                    }`}
+                    onClick={() => setItemDraft((d) => ({ ...d, active: !(d.active !== false) }))}
+                  >
+                    <span
+                      className={`absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ${
+                        itemDraft.active !== false ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
 
               {/* Modal Footer */}
@@ -757,9 +981,14 @@ export default function Admin() {
                 <button
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white font-semibold text-[0.88rem] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(220,38,38,0.3)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                   onClick={saveItem}
-                  disabled={!itemDraft.name.trim()}
+                  disabled={!itemDraft.name.trim() || saving}
                 >
-                  <Save size={15} /> {editingItem ? 'Guardar Cambios' : 'Crear Artículo'}
+                  {saving ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : (
+                    <Save size={15} />
+                  )}
+                  {editingItem ? 'Guardar Cambios' : 'Crear Artículo'}
                 </button>
               </div>
             </motion.div>
@@ -931,9 +1160,14 @@ export default function Admin() {
                 <button
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white font-semibold text-[0.88rem] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(220,38,38,0.3)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                   onClick={saveEvent}
-                  disabled={!eventDraft.title.trim()}
+                  disabled={!eventDraft.title.trim() || saving}
                 >
-                  <Save size={15} /> {editingEvent ? 'Guardar Cambios' : 'Crear Evento'}
+                  {saving ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : (
+                    <Save size={15} />
+                  )}
+                  {editingEvent ? 'Guardar Cambios' : 'Crear Evento'}
                 </button>
               </div>
             </motion.div>

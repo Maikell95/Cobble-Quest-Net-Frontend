@@ -1,12 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Loader2, AlertCircle, Shield, ShieldOff } from 'lucide-react';
+import { X, User, Loader2, AlertCircle, Shield, ShieldOff, LogOut, Wifi } from 'lucide-react';
 import { usePlayer } from '../../context/usePlayer';
 
 export default function PlayerModal() {
-  const { isModalOpen, closeModal, setPlayer, isLoading, error } = usePlayer();
+  const { isModalOpen, closeModal, setPlayer, clearPlayer, player, isLoading, error } = usePlayer();
   const [username, setUsername] = useState('');
   const [isPremium, setIsPremium] = useState(true);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isModalOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,6 +27,12 @@ export default function PlayerModal() {
     if (!trimmed) return;
     const ok = await setPlayer(trimmed, isPremium);
     if (ok) setUsername('');
+  };
+
+  const handleDisconnect = () => {
+    clearPlayer();
+    setUsername('');
+    closeModal();
   };
 
   return (
@@ -61,6 +80,49 @@ export default function PlayerModal() {
 
             {/* Body */}
             <form onSubmit={handleSubmit} className="p-6">
+              {/* Connected player info */}
+              {player && (
+                <div className="flex items-center gap-3 mb-5 p-3.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-theme)]">
+                  <img src={player.avatar} alt={player.username} className="w-10 h-10 rounded-lg shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[var(--text-primary)] text-[0.92rem] font-semibold m-0 truncate">{player.username}</p>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                      <span className={`inline-flex items-center gap-1 text-[0.72rem] font-medium px-1.5 py-0.5 rounded ${
+                        player.premium
+                          ? 'bg-[#22c55e]/10 text-[#22c55e]'
+                          : 'bg-[#f59e0b]/10 text-[#f59e0b]'
+                      }`}>
+                        {player.premium ? <Shield size={10} /> : <ShieldOff size={10} />}
+                        {player.premium ? 'Premium' : 'No Premium'}
+                      </span>
+                      {player.online && (
+                        <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium px-1.5 py-0.5 rounded bg-[#22c55e]/10 text-[#22c55e]">
+                          <Wifi size={10} />
+                          En línea
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDisconnect}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[rgba(255,82,82,0.08)] border border-[rgba(255,82,82,0.15)] text-[#ff5252] text-[0.75rem] font-medium cursor-pointer transition-all hover:bg-[rgba(255,82,82,0.15)] hover:border-[rgba(255,82,82,0.3)] shrink-0"
+                  >
+                    <LogOut size={12} />
+                    <span className="hidden sm:inline">Desconectar</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Separator when changing player */}
+              {player && (
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px bg-[var(--border-theme)]" />
+                  <span className="text-[var(--text-muted)] text-[0.75rem]">Cambiar jugador</span>
+                  <div className="flex-1 h-px bg-[var(--border-theme)]" />
+                </div>
+              )}
+
               <div className="relative mb-4">
                 <input
                   type="text"
@@ -109,15 +171,15 @@ export default function PlayerModal() {
                 </button>
               </div>
 
-              {/* Error */}
+              {/* Error / Warning */}
               {error && (
                 <motion.div
-                  className="flex items-center gap-2 text-[#ff5252] text-[0.82rem] mb-4 p-3 rounded-lg bg-[rgba(255,82,82,0.08)]"
+                  className="flex items-start gap-2 text-[0.82rem] mb-4 p-3 rounded-lg text-[#ff5252] bg-[rgba(255,82,82,0.08)]"
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <AlertCircle size={14} className="shrink-0" />
-                  {error}
+                  <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                  <span>{error}</span>
                 </motion.div>
               )}
 

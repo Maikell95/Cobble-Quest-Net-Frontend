@@ -1,9 +1,30 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Copy, Check, ChevronRight, Download } from 'lucide-react';
+import { Copy, Check, ChevronRight, Download, CalendarDays } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { SERVER_CONFIG } from '../../config/constants';
 import { useServerStatus } from '../../hooks/useServerStatus';
+import type { ServerEvent, EventTag } from '../../types';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+const EVENT_TAG_COLORS: Record<EventTag, string> = {
+  pvp: '#ef4444',
+  capture: '#22c55e',
+  exploration: '#3b82f6',
+  tournament: '#f59e0b',
+  seasonal: '#a855f7',
+  special: '#ec4899',
+};
+
+const EVENT_TAG_LABELS: Record<EventTag, string> = {
+  pvp: 'PvP',
+  capture: 'Captura',
+  exploration: 'Exploración',
+  tournament: 'Torneo',
+  seasonal: 'Temporada',
+  special: 'Especial',
+};
 
 const B = import.meta.env.BASE_URL;
 const regions = [
@@ -19,10 +40,17 @@ const regions = [
 
 const VIDEO_MAX_TIME = 235; // 3 minutes 55 seconds
 
+function formatEventDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+}
+
 export default function Home() {
   const [copied, setCopied] = useState(false);
   const serverStats = useServerStatus();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [events, setEvents] = useState<ServerEvent[]>([]);
 
   // Video time management
   useEffect(() => {
@@ -47,6 +75,14 @@ export default function Home() {
       video.removeEventListener('timeupdate', handleTimeUpdate);
       sessionStorage.setItem('hero-video-time', String(video.currentTime));
     };
+  }, []);
+
+  // Fetch active events
+  useEffect(() => {
+    fetch(`${API_URL}/api/events`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(r)))
+      .then((d) => setEvents(d.data ?? []))
+      .catch(() => {});
   }, []);
 
   const copyIP = () => {
@@ -154,17 +190,86 @@ export default function Home() {
             <p className="text-[var(--text-muted)] text-[1.05rem] max-md:text-[0.95rem] max-md:px-2">Participa en eventos únicos con recompensas exclusivas cada semana</p>
           </motion.div>
 
-          <motion.div
-            className="text-center py-16 px-4 rounded-2xl border border-dashed border-[var(--border-theme)] bg-[var(--bg-surface)]"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <img src={`${B}images/pokemon/gastly.webp`} alt="Gastly" className="w-24 h-24 mx-auto mb-4 opacity-30 grayscale" />
-            <h3 className="text-[var(--text-secondary)] text-[1.2rem] font-semibold mb-2">Próximamente</h3>
-            <p className="text-[var(--text-muted)] text-[0.95rem]">Los eventos del servidor se publicarán aquí pronto.</p>
-          </motion.div>
+          {events.length === 0 ? (
+            <motion.div
+              className="text-center py-16 px-4 rounded-2xl border border-dashed border-[var(--border-theme)] bg-[var(--bg-surface)]"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <img src={`${B}images/pokemon/gastly.webp`} alt="Gastly" className="w-24 h-24 mx-auto mb-4 opacity-30 grayscale" />
+              <h3 className="text-[var(--text-secondary)] text-[1.2rem] font-semibold mb-2">Próximamente</h3>
+              <p className="text-[var(--text-muted)] text-[0.95rem]">Los eventos del servidor se publicarán aquí pronto.</p>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-3 gap-5 max-lg:grid-cols-2 max-sm:grid-cols-1">
+              {events.slice(0, 6).map((event, i) => (
+                <motion.div
+                  key={event.id}
+                  className="group bg-[var(--bg-card)] border border-[var(--border-theme)] rounded-2xl overflow-hidden transition-all hover:border-[var(--border-hover)] hover:shadow-[var(--shadow-md)]"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.08 }}
+                >
+                  {/* Event image */}
+                  <div className="relative aspect-[16/9] overflow-hidden bg-[var(--bg-surface)]">
+                    {event.image ? (
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <CalendarDays size={40} className="text-[var(--text-muted)] opacity-30" />
+                      </div>
+                    )}
+                    {/* Tags overlay */}
+                    {event.tags.length > 0 && (
+                      <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
+                        {event.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-[0.68rem] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm"
+                            style={{
+                              background: `${EVENT_TAG_COLORS[tag]}30`,
+                              color: EVENT_TAG_COLORS[tag],
+                            }}
+                          >
+                            {EVENT_TAG_LABELS[tag]}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Event info */}
+                  <div className="p-5">
+                    <h3 className="text-[var(--text-primary)] text-[1.05rem] font-bold mb-1.5 line-clamp-1">
+                      {event.title}
+                    </h3>
+                    {event.description && (
+                      <p className="text-[var(--text-muted)] text-[0.85rem] leading-relaxed mb-3 line-clamp-2">
+                        {event.description}
+                      </p>
+                    )}
+                    {(event.startDate || event.endDate) && (
+                      <div className="flex items-center gap-1.5 text-[var(--text-muted)] text-[0.78rem]">
+                        <CalendarDays size={13} />
+                        <span>
+                          {formatEventDate(event.startDate)}
+                          {event.endDate && ` — ${formatEventDate(event.endDate)}`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

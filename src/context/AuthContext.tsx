@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [username, setUsername] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // On mount, check for saved token and verify it
+  // On mount (page refresh), verify saved token and get a fresh one
   useEffect(() => {
     const saved = sessionStorage.getItem(TOKEN_KEY);
     if (!saved) {
@@ -30,12 +30,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    fetch(`${API_URL}/api/auth/me`, {
+    // Refresh the token so the 8h expiry resets on every page load
+    fetch(`${API_URL}/api/auth/refresh`, {
+      method: 'POST',
       headers: { Authorization: `Bearer ${saved}` },
     })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
-        setToken(saved);
+        const newToken = data.data.token as string;
+        sessionStorage.setItem(TOKEN_KEY, newToken);
+        setToken(newToken);
+
+        // Decode username from the refreshed token
+        return fetch(`${API_URL}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${newToken}` },
+        });
+      })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
         setUsername(data.data.username);
       })
       .catch(() => {

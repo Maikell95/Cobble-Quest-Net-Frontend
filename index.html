@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/CBQ/images/cobblequest.svg" />
+    <link rel="icon" type="image/svg+xml" href="/images/cobblequest.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Cobble Quest Network - Servidor de Cobblemon en Minecraft." />
     <meta name="theme-color" content="#0a0a1a" />
@@ -12,29 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <!-- Redirect to homepage on refresh -->
-    <script>
-      (function() {
-        var base = '/CBQ/';
-        var isReload = performance.navigation
-          ? performance.navigation.type === 1
-          : performance.getEntriesByType('navigation')[0]?.type === 'reload';
-        if (isReload && window.location.pathname !== base) {
-          window.location.replace(base);
-        }
-      })();
-    </script>
-    <!-- SPA redirect handler for GitHub Pages 404.html -->
-    <script>
-      (function(l) {
-        if (l.search[1] === '/') {
-          var decoded = l.search.slice(1).split('&').map(function(s) {
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
-        }
-      }(window.location))
-    </script>
     <!-- Initial loading screen -->
     <style>
       #initial-loader {
@@ -91,8 +68,7 @@
     </div>
     <div id="root"></div>
     <script>
-      // Use the known base path for the image
-      document.getElementById('loader-img').src = '/CBQ/images/pokemon/croagunk-cobblemon.webp';
+      document.getElementById('loader-img').src = '/images/pokemon/croagunk-cobblemon.webp';
       // Fallback: dismiss after 10s if React fails to load
       setTimeout(function() {
         var loader = document.getElementById('initial-loader');

@@ -1,23 +1,10 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Filter } from 'lucide-react';
-
-const B = import.meta.env.BASE_URL;
-const CATEGORIES = [
-  { id: 'all', label: 'Todo', image: '' },
-  { id: 'keys', label: 'Llaves', image: `${B}images/store/gilded-chest.png` },
-  { id: 'breeding', label: 'Crianza', image: `${B}images/store/pasture-block.png` },
-  { id: 'battlepass', label: 'Pase de Batalla', image: `${B}images/store/kings-rock.png` },
-  { id: 'extras', label: 'Extras', image: `${B}images/store/relic-coin.png` },
-];
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Loader2, ShoppingCart, AlertCircle } from 'lucide-react';
+import { Search, Filter, Loader2, ShoppingCart } from 'lucide-react';
 import { usePlayer } from '../../context/usePlayer';
 import { useCart } from '../../context/useCart';
 import { CURRENCY_SYMBOL } from '../../config/constants';
-import type { TebexPackage } from '../../types';
+import type { StoreItem } from '../../types';
 
 const B = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -33,7 +20,7 @@ const CATEGORIES = [
 export default function Store() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [packages, setPackages] = useState<TebexPackage[]>([]);
+  const [packages, setPackages] = useState<StoreItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { requireWhitelistedPlayer, player } = usePlayer();
@@ -47,7 +34,7 @@ export default function Store() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/checkout/packages`);
+      const res = await fetch(`${API_URL}/api/store`);
       const data = await res.json();
       if (res.ok && data.success) {
         setPackages(data.data);
@@ -63,24 +50,17 @@ export default function Store() {
 
   const filtered = packages.filter((pkg) => {
     const matchesCategory = activeCategory === 'all' ||
-      pkg.category?.name.toLowerCase().includes(activeCategory);
+      pkg.category?.toLowerCase().includes(activeCategory);
     const matchesSearch = !searchQuery ||
       pkg.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const handleAddToCart = (pkg: TebexPackage) => {
-    if (!requireWhitelistedPlayer() || !player) return;
+  const handleAddToCart = async (pkg: StoreItem) => {
+    if (!(await requireWhitelistedPlayer()) || !player) return;
 
     addItem({
-      item: {
-        id: pkg.id,
-        name: pkg.name,
-        image: pkg.image || '',
-        price: pkg.total_price,
-        category: (pkg.category?.name.toLowerCase() as 'keys' | 'breeding' | 'battlepass' | 'extras') || 'extras',
-        description: pkg.description,
-      },
+      item: pkg,
       quantity: 1,
       type: 'item',
     });
@@ -152,7 +132,7 @@ export default function Store() {
         {/* Error */}
         {error && !loading && (
           <div className="text-center py-20 px-4 rounded-2xl border border-dashed border-[var(--border-theme)] bg-[var(--bg-surface)]">
-            <AlertCircle size={40} className="text-[#ff5252] mx-auto mb-4" />
+            <img src={`${B}images/pokemon/gastly.webp`} alt="Gastly" className="w-24 h-24 mx-auto mb-4 opacity-30 grayscale" />
             <h3 className="text-[var(--text-secondary)] text-[1.2rem] font-semibold mb-2">Error</h3>
             <p className="text-[var(--text-muted)] text-[0.95rem]">{error}</p>
           </div>
@@ -177,7 +157,7 @@ export default function Store() {
                 <div className="p-5">
                   {pkg.category && (
                     <span className="text-[0.72rem] font-semibold uppercase tracking-wider text-primary/80 mb-1 block">
-                      {pkg.category.name}
+                      {pkg.category}
                     </span>
                   )}
                   <h3 className="text-[var(--text-primary)] text-[1.05rem] font-bold mb-2">{pkg.name}</h3>
@@ -186,8 +166,7 @@ export default function Store() {
                   )}
                   <div className="flex items-center justify-between mt-auto">
                     <span className="text-[var(--text-primary)] text-[1.2rem] font-extrabold">
-                      {CURRENCY_SYMBOL}{pkg.total_price.toFixed(2)}
-                      {pkg.currency && <span className="text-[0.7rem] text-[var(--text-muted)] ml-1">{pkg.currency}</span>}
+                      {CURRENCY_SYMBOL}{pkg.price.toFixed(2)}
                     </span>
                     <button
                       className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white border-none font-semibold text-[0.85rem] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(220,38,38,0.3)]"
