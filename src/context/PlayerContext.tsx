@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { createContext, useState, useCallback, useRef, type ReactNode } from 'react';
 
 const STORAGE_KEY = 'cbq_player';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
