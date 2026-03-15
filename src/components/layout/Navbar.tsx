@@ -54,7 +54,7 @@ export default function Navbar() {
       <div className="max-w-[1280px] mx-auto px-6 h-[70px] flex items-center justify-between max-md:px-4 max-md:h-[60px]">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 no-underline text-[var(--text-primary)] hover:opacity-85 transition-opacity">
-          <img src={`${B}images/cobblequest.svg`} alt="Cobble Quest" className="w-9 h-9 rounded-lg object-contain" />
+          <img src={`${B}images/resultado.svg`} alt="Cobble Quest" className="w-9 h-9 rounded-lg object-contain" />
           <span className="font-display text-[1.4rem] font-bold text-[var(--text-primary)] max-[480px]:text-[1.15rem]">{SERVER_CONFIG.name}</span>
         </Link>
 

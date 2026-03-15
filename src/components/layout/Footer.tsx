@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Gamepad2 } from 'lucide-react';
 import { SERVER_CONFIG, NAV_LINKS } from '../../config/constants';
+
+const B = import.meta.env.BASE_URL;
 
 export default function Footer() {
   return (
@@ -10,7 +11,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3 text-[var(--footer-heading)] font-display text-[1.2rem] font-bold">
-              <Gamepad2 size={28} className="text-primary" />
+              <img src={`${B}images/resultado.svg`} alt="Cobble Quest" className="w-7 h-7 object-contain" />
               <span>{SERVER_CONFIG.name}</span>
             </div>
             <p className="text-[var(--footer-text)] text-[0.9rem] leading-relaxed">{SERVER_CONFIG.description}</p>

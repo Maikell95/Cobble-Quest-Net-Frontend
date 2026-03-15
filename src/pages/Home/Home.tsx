@@ -40,6 +40,8 @@ const regions = [
 
 const VIDEO_MAX_TIME = 235; // 3 minutes 55 seconds
 
+const IS_MOBILE = typeof window !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent);
+
 function formatEventDate(dateStr: string): string {
   if (!dateStr) return '';
   const d = new Date(dateStr + 'T00:00:00');
@@ -96,27 +98,39 @@ export default function Home() {
       {/* ===== HERO SECTION ===== */}
       <section className="relative min-h-[90vh] flex items-center justify-center p-8 max-md:p-5 max-md:pt-24 max-md:min-h-[100svh] overflow-hidden">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover scale-[1.15] max-md:scale-100" autoPlay muted playsInline loop={false}>
-            <source src={`${B}videos/trailer.mp4`} type="video/mp4" />
-          </video>
+          {IS_MOBILE ? (
+            <img
+              src={`${B}images/cobblequest.jpg`}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover scale-[1.15]" autoPlay muted playsInline loop={false}>
+              <source src={`${B}videos/trailer.mp4`} type="video/mp4" />
+            </video>
+          )}
           <div className="absolute inset-0 bg-black/40 z-[1]" />
-          <div className="absolute inset-0 z-[2] animate-drift"
-            style={{
-              backgroundImage: `radial-gradient(1px 1px at 10% 20%, var(--text-muted) 50%, transparent 50%),
-                radial-gradient(1px 1px at 30% 60%, var(--text-muted) 50%, transparent 50%),
-                radial-gradient(1px 1px at 50% 40%, var(--text-muted) 50%, transparent 50%),
-                radial-gradient(1px 1px at 70% 80%, var(--text-muted) 50%, transparent 50%),
-                radial-gradient(1px 1px at 90% 30%, var(--text-muted) 50%, transparent 50%),
-                radial-gradient(2px 2px at 20% 70%, rgba(220,38,38,0.3) 50%, transparent 50%),
-                radial-gradient(2px 2px at 60% 20%, rgba(220,38,38,0.2) 50%, transparent 50%),
-                radial-gradient(2px 2px at 80% 50%, rgba(239,68,68,0.2) 50%, transparent 50%)`
-            }}
-          />
+          {!IS_MOBILE && (
+            <div className="absolute inset-0 z-[2] animate-drift"
+              style={{
+                backgroundImage: `radial-gradient(1px 1px at 10% 20%, var(--text-muted) 50%, transparent 50%),
+                  radial-gradient(1px 1px at 30% 60%, var(--text-muted) 50%, transparent 50%),
+                  radial-gradient(1px 1px at 50% 40%, var(--text-muted) 50%, transparent 50%),
+                  radial-gradient(1px 1px at 70% 80%, var(--text-muted) 50%, transparent 50%),
+                  radial-gradient(1px 1px at 90% 30%, var(--text-muted) 50%, transparent 50%),
+                  radial-gradient(2px 2px at 20% 70%, rgba(220,38,38,0.3) 50%, transparent 50%),
+                  radial-gradient(2px 2px at 60% 20%, rgba(220,38,38,0.2) 50%, transparent 50%),
+                  radial-gradient(2px 2px at 80% 50%, rgba(239,68,68,0.2) 50%, transparent 50%)`
+              }}
+            />
+          )}
           <div className="absolute inset-0 z-[2]"
             style={{
-              background: `radial-gradient(ellipse at 50% 30%, rgba(220,38,38,0.12) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 80%, rgba(220,38,38,0.06) 0%, transparent 50%),
-                linear-gradient(180deg, transparent 0%, var(--bg-base) 100%)`
+              background: IS_MOBILE
+                ? `linear-gradient(180deg, transparent 0%, var(--bg-base) 100%)`
+                : `radial-gradient(ellipse at 50% 30%, rgba(220,38,38,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 80%, rgba(220,38,38,0.06) 0%, transparent 50%),
+                  linear-gradient(180deg, transparent 0%, var(--bg-base) 100%)`
             }}
           />
         </div>

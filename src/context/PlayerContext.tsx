@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 
 const STORAGE_KEY = 'cbq_player';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -23,6 +23,8 @@ interface PlayerContextType {
   requirePlayer: () => boolean;
   /** Ensures a player is selected. Opens modal if not. Returns true if player exists. */
   requireWhitelistedPlayer: () => Promise<boolean>;
+  /** Start polling online status (call when modal opens). Returns stop function. */
+  startPollingOnlineStatus: () => () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -121,9 +123,42 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return true;
   }, [player, openModal]);
 
+  const pollingRef = useRef(false);
+
+  const startPollingOnlineStatus = useCallback((): (() => void) => {
+    pollingRef.current = true;
+
+    const poll = async () => {
+      if (!pollingRef.current) return;
+      const current = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') as PlayerData | null;
+      if (!current) return;
+      try {
+        const res = await fetch(`${API_URL}/api/player/online`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const players: string[] = data.summary?.uniquePlayers || [];
+        const online = players.some(p => p.toLowerCase() === current.username.toLowerCase());
+        if (online !== current.online) {
+          const updated = { ...current, online };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+          setPlayerState(updated);
+        }
+      } catch {
+        // silently ignore network errors
+      }
+    };
+
+    poll();
+    const id = setInterval(poll, 15000);
+    return () => {
+      pollingRef.current = false;
+      clearInterval(id);
+    };
+  }, []);
+
   return (
     <PlayerContext.Provider
-      value={{ player, isModalOpen, isLoading, error, openModal, closeModal, setPlayer, clearPlayer, requirePlayer, requireWhitelistedPlayer }}
+      value={{ player, isModalOpen, isLoading, error, openModal, closeModal, setPlayer, clearPlayer, requirePlayer, requireWhitelistedPlayer, startPollingOnlineStatus }}
     >
       {children}
     </PlayerContext.Provider>

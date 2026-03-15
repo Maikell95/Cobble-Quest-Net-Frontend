@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Loader2, AlertCircle, Shield, ShieldOff, LogOut, Wifi } from 'lucide-react';
+import { X, User, Loader2, AlertCircle, Shield, ShieldOff, LogOut, Wifi, WifiOff } from 'lucide-react';
 import { usePlayer } from '../../context/usePlayer';
 
 export default function PlayerModal() {
-  const { isModalOpen, closeModal, setPlayer, clearPlayer, player, isLoading, error } = usePlayer();
+  const { isModalOpen, closeModal, setPlayer, clearPlayer, player, isLoading, error, startPollingOnlineStatus } = usePlayer();
   const [username, setUsername] = useState('');
   const [isPremium, setIsPremium] = useState(true);
+
+  useEffect(() => {
+    if (!isModalOpen || !player) return;
+    const stop = startPollingOnlineStatus();
+    return stop;
+  }, [isModalOpen, player, startPollingOnlineStatus]);
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -95,10 +101,15 @@ export default function PlayerModal() {
                         {player.premium ? <Shield size={10} /> : <ShieldOff size={10} />}
                         {player.premium ? 'Premium' : 'No Premium'}
                       </span>
-                      {player.online && (
+                      {player.online ? (
                         <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium px-1.5 py-0.5 rounded bg-[#22c55e]/10 text-[#22c55e]">
                           <Wifi size={10} />
                           En línea
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium px-1.5 py-0.5 rounded bg-[#ef4444]/10 text-[#ef4444]">
+                          <WifiOff size={10} />
+                          Desconectado
                         </span>
                       )}
                     </div>
